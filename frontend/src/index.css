@@ -1,0 +1,113 @@
+/* WildBook — Global Styles */
+
+/* Google Fonts — must come before @import tailwindcss */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Tailwind v4 */
+@import "tailwindcss";
+
+/* Theme variable sets */
+@import './theme/theme-user.css';
+@import './theme/theme-admin.css';
+@import './theme/theme-owner.css';
+
+/* ── Base resets ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+  background-color: var(--bg-page, #F6F1E7);
+  color: var(--text-primary, #1F3D2B);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading, 'Cormorant Garamond', Georgia, serif);
+  line-height: 1.2;
+}
+
+/* ── Utility helpers (supplement Tailwind) ────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: var(--card-radius, 16px);
+  box-shadow: var(--card-shadow, 0 2px 16px 0 rgba(31,61,43,0.10));
+}
+
+.btn-primary {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary:hover {
+  background-color: var(--btn-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-forest);
+  border: 1.5px solid var(--color-forest);
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  background: var(--color-forest);
+  color: #fff;
+}
+
+/* ── Status badge base ────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge-confirmed { background: #dcf0e0; color: var(--status-confirmed, #3a7d44); }
+.badge-pending   { background: #fef3d8; color: var(--status-pending,   #D9A441); }
+.badge-cancelled { background: #fde8e8; color: var(--status-cancelled, #c0392b); }
+.badge-past      { background: #ececec; color: var(--status-past,      #8d8d8d); }
+.badge-draft     { background: #ececec; color: var(--status-draft,     #8d8d8d); }
+.badge-approved  { background: #dcf0e0; color: var(--status-approved,  #3a7d44); }
+.badge-rejected  { background: #fde8e8; color: var(--status-rejected,  #c0392b); }
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-sage, #A9BFA0); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-moss, #5E7F4F); }

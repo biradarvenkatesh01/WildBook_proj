@@ -1,0 +1,50 @@
+/* ─── WildBook · User (Visitor) Theme ───────────────────────────────────────
+   Applied when the root element has class="theme-user"
+   Design tokens from design-spec.md "Portal identity"
+   ──────────────────────────────────────────────────────────────────────────── */
+.theme-user {
+  /* Page background */
+  --bg-page:          #F6F1E7;   /* Cream */
+
+  /* Navigation */
+  --bg-nav:           #1F3D2B;   /* Forest green */
+  --text-nav:         #F6F1E7;   /* Cream on dark nav */
+
+  /* Accent / highlights */
+  --color-accent:     #D9A441;   /* Amber */
+
+  /* Primary button */
+  --btn-primary-bg:   #D9A441;   /* Amber */
+  --btn-primary-text: #1F3D2B;   /* Forest green text on amber */
+  --btn-primary-hover:#b8872e;   /* Darker amber on hover */
+
+  /* Supporting palette */
+  --color-forest:     #1F3D2B;
+  --color-moss:       #5E7F4F;
+  --color-sage:       #A9BFA0;
+  --color-cream:      #F6F1E7;
+  --color-bark:       #6B4F3A;
+  --color-amber:      #D9A441;
+
+  /* Card */
+  --card-radius:      16px;
+  --card-shadow:      0 2px 16px 0 rgba(31,61,43,0.10);
+
+  /* Typography */
+  --font-heading:     'Cormorant Garamond', Georgia, serif;
+  --font-body:        'Inter', system-ui, sans-serif;
+
+  /* Status badge colours */
+  --status-confirmed: #3a7d44;
+  --status-pending:   #D9A441;
+  --status-cancelled: #c0392b;
+  --status-past:      #8d8d8d;
+  --status-draft:     #8d8d8d;
+  --status-approved:  #3a7d44;
+  --status-rejected:  #c0392b;
+
+  /* Text */
+  --text-primary:     #1F3D2B;
+  --text-secondary:   #6B4F3A;
+  --text-muted:       #5E7F4F;
+}

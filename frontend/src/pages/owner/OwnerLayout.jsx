@@ -1,0 +1,107 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import OwnerSidebar from '../../components/OwnerSidebar';
+import { useAuth } from '../../context/AuthContext';
+
+export default function OwnerLayout({ children, activeTitle = 'Authority Portal' }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [flash, setFlash] = useState(location.state?.flashMessage || null);
+
+  useEffect(() => {
+    if (location.state?.flashMessage) {
+      setFlash(location.state.flashMessage);
+    }
+  }, [location.state?.flashMessage]);
+
+  const handleLogout = () => {
+    const targetUrl = logout();
+    navigate(targetUrl || '/owner/login', { replace: true });
+  };
+
+  return (
+    <div className="theme-owner flex h-screen overflow-hidden bg-[#F6F1E7]">
+      {/* ── Fixed Collapsible Owner Sidebar ───────────────────────────────── */}
+      <OwnerSidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+
+      {/* ── Main Content Area ────────────────────────────────────────────── */}
+      <div
+        className="flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300"
+        style={{
+          marginLeft: collapsed ? '68px' : '230px',
+        }}
+      >
+        {/* Top Navigation Bar */}
+        <header className="h-16 bg-white border-b border-[#E5DAC6] px-6 flex items-center justify-between shrink-0 shadow-xs">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setCollapsed((c) => !c)}
+              className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+              aria-label="Toggle sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-xl font-serif text-[#162B1D] font-medium hidden sm:block">
+              {activeTitle}
+            </h1>
+          </div>
+
+          {/* Right Header Controls */}
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Authority Clearance Active
+            </div>
+
+            <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
+              <div className="text-right hidden sm:block">
+                <span className="block text-xs font-semibold text-gray-900">{user?.name || 'Site Owner'}</span>
+                <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Super Authority</span>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-[#162B1D] text-[#D9A441] flex items-center justify-center font-bold text-sm shadow-inner">
+                {user?.name?.[0]?.toUpperCase() || 'O'}
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Log out"
+                className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Dynamic Page Content */}
+        <main className="flex-1 overflow-y-auto bg-[#F6F1E7]">
+          {flash && (
+            <div className="bg-[#D9A441] text-[#162B1D] px-6 py-3 text-xs font-semibold flex items-center justify-between border-b border-[#c8922a] shadow-xs">
+              <div className="flex items-center gap-2">
+                <span>ℹ️</span>
+                <span>{flash}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFlash(null)}
+                className="text-xs px-2 py-0.5 rounded hover:bg-black/10 font-bold"
+                aria-label="Dismiss alert"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}

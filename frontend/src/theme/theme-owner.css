@@ -1,0 +1,60 @@
+/* ─── WildBook · Owner (Authority / Government) Theme ──────────────────────
+   Applied when the root element has class="theme-owner"
+   Design tokens from design-spec.md "Portal identity"
+   The owner portal is the most authoritative — deeper forest greens and
+   gold accents to convey governmental authority.
+   ──────────────────────────────────────────────────────────────────────────── */
+.theme-owner {
+  /* Page background */
+  --bg-page:          #F5F7F5;
+
+  /* Sidebar / Navigation — deeper, more authoritative */
+  --bg-nav:           #162B1D;   /* Deeper forest green */
+  --text-nav:         #E8EDE9;
+  --bg-nav-active:    rgba(217,164,65,0.20);
+  --border-nav-active:#D9A441;
+
+  /* Accent */
+  --color-accent:     #D9A441;   /* Amber / gold */
+
+  /* Primary button */
+  --btn-primary-bg:   #1F3D2B;   /* Forest green button (authority feel) */
+  --btn-primary-text: #F6F1E7;
+  --btn-primary-hover:#162B1D;
+
+  /* Secondary button (approve actions) */
+  --btn-approve-bg:   #3a7d44;
+  --btn-approve-text: #fff;
+  --btn-reject-bg:    #c0392b;
+  --btn-reject-text:  #fff;
+
+  /* Supporting palette */
+  --color-forest:     #162B1D;
+  --color-moss:       #5E7F4F;
+  --color-sage:       #A9BFA0;
+  --color-cream:      #F6F1E7;
+  --color-bark:       #6B4F3A;
+  --color-amber:      #D9A441;
+
+  /* Card */
+  --card-radius:      16px;
+  --card-shadow:      0 2px 16px 0 rgba(22,43,29,0.10);
+
+  /* Typography */
+  --font-heading:     'Cormorant Garamond', Georgia, serif;
+  --font-body:        'Inter', system-ui, sans-serif;
+
+  /* Status badge colours */
+  --status-confirmed: #3a7d44;
+  --status-pending:   #D9A441;
+  --status-cancelled: #c0392b;
+  --status-past:      #8d8d8d;
+  --status-draft:     #8d8d8d;
+  --status-approved:  #3a7d44;
+  --status-rejected:  #c0392b;
+
+  /* Text */
+  --text-primary:     #162B1D;
+  --text-secondary:   #4a5568;
+  --text-muted:       #718096;
+}
