@@ -219,6 +219,10 @@ export default function BrowseSanctuaries() {
                         <img
                           src={cover}
                           alt={s.name}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                         />
                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold text-[#1F3D2B] shadow-xs flex items-center gap-1">

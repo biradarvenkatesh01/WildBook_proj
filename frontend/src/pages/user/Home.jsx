@@ -226,6 +226,10 @@ export default function Home() {
                 <img
                   src={s.cover_image || 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80'}
                   alt={s.name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
+                  }}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
                 />
                 {/* Dark Gradient Overlay */}

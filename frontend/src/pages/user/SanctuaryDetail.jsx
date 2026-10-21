@@ -116,6 +116,10 @@ export default function SanctuaryDetail() {
                 <img
                   src={activePhoto || sanctuary.cover_image || 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1200&q=80'}
                   alt={sanctuary.name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1200&q=80';
+                  }}
                   className="w-full h-full object-cover group-hover:scale-[1.02] transition duration-500"
                 />
                 {images.length > 0 && (
@@ -147,6 +151,10 @@ export default function SanctuaryDetail() {
                       <img
                         src={img.image_path}
                         alt={`Thumbnail ${idx + 1}`}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
+                        }}
                         className="w-full h-full object-cover"
                       />
                     </button>
