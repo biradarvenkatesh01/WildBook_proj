@@ -138,6 +138,14 @@ async function createSanctuary(req, res, next) {
       });
     }
 
+    let cleanPhone = null;
+    if (contact_phone && contact_phone.trim()) {
+      cleanPhone = contact_phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ error: 'Contact phone number must be exactly 10 digits.' });
+      }
+    }
+
     const [result] = await pool.query(
       `INSERT INTO sanctuaries (
         admin_id, name, location, description, contact_email, contact_phone, 
@@ -150,7 +158,7 @@ async function createSanctuary(req, res, next) {
         location.trim(),
         description.trim(),
         contact_email ? contact_email.trim() : null,
-        contact_phone ? contact_phone.trim() : null,
+        cleanPhone,
         website ? website.trim() : null,
         opening_time || null,
         closing_time || null,
@@ -225,6 +233,14 @@ async function updateSanctuary(req, res, next) {
       });
     }
 
+    let cleanPhone = null;
+    if (contact_phone && contact_phone.trim()) {
+      cleanPhone = contact_phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ error: 'Contact phone number must be exactly 10 digits.' });
+      }
+    }
+
     await pool.query(
       `UPDATE sanctuaries SET
         name = ?,
@@ -245,7 +261,7 @@ async function updateSanctuary(req, res, next) {
         location.trim(),
         description.trim(),
         contact_email ? contact_email.trim() : null,
-        contact_phone ? contact_phone.trim() : null,
+        cleanPhone,
         website ? website.trim() : null,
         opening_time || null,
         closing_time || null,

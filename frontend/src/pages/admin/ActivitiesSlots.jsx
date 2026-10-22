@@ -963,13 +963,18 @@ function GuidesModal({ sanctuaryId, guides, onClose, onRefresh }) {
 
   const handleAddGuide = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError('');
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setError('Guide phone number must be exactly 10 digits.');
+      return;
+    }
+    setSaving(true);
     try {
       await client.post('/admin/guides', {
         sanctuary_id: sanctuaryId,
         name,
-        phone,
+        phone: cleanPhone,
         experience,
       });
       setName('');
@@ -1042,12 +1047,15 @@ function GuidesModal({ sanctuaryId, guides, onClose, onRefresh }) {
               className="text-xs border rounded-lg p-2 focus:outline-none"
             />
             <input
-              type="text"
-              placeholder="Phone (e.g. +91 94481...)"
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              placeholder="Phone (10 digits)"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
               required
-              className="text-xs border rounded-lg p-2 focus:outline-none"
+              className="text-xs border rounded-lg p-2 focus:outline-none font-mono"
             />
           </div>
           <div className="flex items-center gap-2">

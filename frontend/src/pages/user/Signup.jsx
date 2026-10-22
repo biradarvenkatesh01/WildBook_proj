@@ -29,6 +29,11 @@ export default function VisitorSignup() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'phone') {
+      const clean = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: clean }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -41,6 +46,11 @@ export default function VisitorSignup() {
 
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (formData.phone && formData.phone.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
       return;
     }
 
@@ -214,10 +224,13 @@ export default function VisitorSignup() {
                   id="phone"
                   name="phone"
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Enter your phone number"
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-[#D5C9B5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D9A441] focus:border-transparent text-gray-900 placeholder-gray-400"
+                  placeholder="e.g. 9876543210 (10 digits)"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-[#D5C9B5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D9A441] focus:border-transparent text-gray-900 placeholder-gray-400 font-mono"
                 />
               </div>
             </div>

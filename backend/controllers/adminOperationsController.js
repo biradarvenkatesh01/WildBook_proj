@@ -254,6 +254,11 @@ exports.createGuide = async (req, res, next) => {
       return res.status(400).json({ error: 'Sanctuary ID, guide name, and phone number are required' });
     }
 
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ error: 'Guide phone number must be exactly 10 digits.' });
+    }
+
     const exp = experience !== undefined ? parseInt(experience, 10) : 0;
     if (isNaN(exp) || exp < 0) {
       return res.status(400).json({ error: 'Experience years cannot be negative' });
@@ -263,7 +268,7 @@ exports.createGuide = async (req, res, next) => {
 
     const [result] = await db.query(
       'INSERT INTO guides (sanctuary_id, name, phone, experience) VALUES (?, ?, ?, ?)',
-      [sanctuary_id, name.trim(), phone.trim(), exp]
+      [sanctuary_id, name.trim(), cleanPhone, exp]
     );
 
     return res.status(201).json({
@@ -294,7 +299,14 @@ exports.updateGuide = async (req, res, next) => {
 
     const current = existing[0];
     const newName = name !== undefined ? name.trim() : current.name;
-    const newPhone = phone !== undefined ? phone.trim() : current.phone;
+    let newPhone = current.phone;
+    if (phone !== undefined) {
+      const clean = phone.replace(/\D/g, '');
+      if (clean.length !== 10) {
+        return res.status(400).json({ error: 'Guide phone number must be exactly 10 digits.' });
+      }
+      newPhone = clean;
+    }
     const newExp = experience !== undefined ? parseInt(experience, 10) : current.experience;
 
     if (!newName || !newPhone) {

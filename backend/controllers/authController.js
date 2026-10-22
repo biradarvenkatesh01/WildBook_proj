@@ -50,6 +50,14 @@ async function userSignup(req, res, next) {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
+    let cleanPhone = null;
+    if (phone && phone.trim()) {
+      cleanPhone = phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ error: 'Phone number must be exactly 10 digits.' });
+      }
+    }
+
     // Check email uniqueness
     const [existing] = await pool.query('SELECT user_id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
@@ -63,14 +71,14 @@ async function userSignup(req, res, next) {
     const [result] = await pool.query(
       `INSERT INTO users (name, email, phone, password_hash, role, account_status)
        VALUES (?, ?, ?, ?, 'VISITOR', 'APPROVED')`,
-      [name.trim(), email.toLowerCase().trim(), phone ? phone.trim() : null, passwordHash]
+      [name.trim(), email.toLowerCase().trim(), cleanPhone, passwordHash]
     );
 
     const newUser = {
       user_id: result.insertId,
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      phone: phone ? phone.trim() : null,
+      phone: cleanPhone,
       role: 'VISITOR',
       account_status: 'APPROVED',
       profile_image: null,
@@ -325,6 +333,14 @@ async function adminSignup(req, res, next) {
       return res.status(400).json({ error: 'Admin password must be at least 8 characters long.' });
     }
 
+    let cleanPhone = null;
+    if (phone && phone.trim()) {
+      cleanPhone = phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ error: 'Phone number must be exactly 10 digits.' });
+      }
+    }
+
     // Validate required documents from multer files
     const files = req.files || {};
     if (!files.license || !files.identity || !files.authorization) {
@@ -358,7 +374,7 @@ async function adminSignup(req, res, next) {
     const [userRes] = await conn.query(
       `INSERT INTO users (name, email, phone, password_hash, role, account_status)
        VALUES (?, ?, ?, ?, 'ADMIN', 'PENDING')`,
-      [name.trim(), email.toLowerCase().trim(), phone ? phone.trim() : null, passwordHash]
+      [name.trim(), email.toLowerCase().trim(), cleanPhone, passwordHash]
     );
 
     const newAdminId = userRes.insertId;

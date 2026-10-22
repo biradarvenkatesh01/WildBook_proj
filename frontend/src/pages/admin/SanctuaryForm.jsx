@@ -82,6 +82,11 @@ export default function SanctuaryForm() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'contact_phone') {
+      const clean = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, contact_phone: clean }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -107,6 +112,11 @@ export default function SanctuaryForm() {
 
     if (!formData.name || !formData.location || !formData.description) {
       setError('Please fill in Sanctuary Name, Location, and Description.');
+      return;
+    }
+
+    if (formData.contact_phone && formData.contact_phone.length !== 10) {
+      setError('Contact phone number must be exactly 10 digits.');
       return;
     }
 
@@ -490,11 +500,14 @@ export default function SanctuaryForm() {
                   id="contact_phone"
                   name="contact_phone"
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                   value={formData.contact_phone}
                   onChange={handleInputChange}
-                  placeholder="+91 821 2480901"
+                  placeholder="e.g. 9876543210 (10 digits)"
                   required
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C9B5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D9A441] text-gray-900"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C9B5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D9A441] text-gray-900 font-mono"
                 />
               </div>
 

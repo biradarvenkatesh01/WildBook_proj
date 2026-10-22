@@ -51,6 +51,11 @@ export default function AdminSignup() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'phone') {
+      const clean = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: clean }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -81,6 +86,11 @@ export default function AdminSignup() {
       !formData.password
     ) {
       setError('Please fill in all required text fields.');
+      return;
+    }
+
+    if (formData.phone && formData.phone.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
       return;
     }
 
@@ -316,10 +326,13 @@ export default function AdminSignup() {
                   id="admin-phone"
                   name="phone"
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                   value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="+91 XXXXX XXXXX"
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C9B5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D9A441] text-gray-900"
+                  placeholder="e.g. 9876543210 (10 digits)"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C9B5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D9A441] text-gray-900 font-mono"
                 />
               </div>
             </div>
