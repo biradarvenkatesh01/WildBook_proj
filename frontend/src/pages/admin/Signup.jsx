@@ -200,7 +200,7 @@ export default function AdminSignup() {
 
       {/* ── Right Form Panel (Design 14) ───────────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 md:p-10 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-xl bg-white border border-[#E5DAC6] rounded-3xl p-8 sm:p-10 shadow-xl shadow-[#1F3D2B]/5 my-6">
+        <div className="w-full max-w-2xl lg:max-w-3xl bg-white border border-[#E5DAC6] rounded-3xl p-8 sm:p-10 lg:p-12 shadow-xl shadow-[#1F3D2B]/5 my-6">
           
           <h1 className="text-3xl font-serif text-[#1F3D2B] mb-1">
             Register your sanctuary
@@ -442,71 +442,106 @@ export default function AdminSignup() {
             </div>
 
             {/* Document Uploads (3 required private documents) */}
-            <div className="p-4 rounded-2xl bg-[#F6F1E7]/70 border border-[#E5DAC6] space-y-3">
-              <span className="block text-xs font-semibold uppercase tracking-wider text-[#1F3D2B]">
-                Verification Documents (PDF or Images, max 10MB each) *
-              </span>
+            <div className="p-5 rounded-2xl bg-[#F6F1E7]/70 border border-[#E5DAC6] space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span className="block text-xs font-bold uppercase tracking-wider text-[#1F3D2B]">
+                  Verification Documents (PDF or Images, max 10MB each) *
+                </span>
+                <span className="text-[11px] text-gray-500 font-medium">
+                  All 3 documents required
+                </span>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 {/* 1. License */}
-                <div className="border border-dashed border-[#C0B4A0] bg-white p-2.5 rounded-xl text-center">
-                  <span className="block text-[11px] font-medium text-gray-700 mb-1">
-                    1. Operating License
-                  </span>
+                <label className="relative border-2 border-dashed border-[#C0B4A0] hover:border-[#D9A441] bg-white p-4 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition duration-150 group hover:bg-[#FAF8F5]">
                   <input
                     type="file"
                     name="license"
                     accept=".pdf,.jpg,.jpeg,.png"
                     onChange={handleFileChange}
-                    required
-                    className="text-[11px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:bg-[#1F3D2B] file:text-white hover:file:bg-[#162B1D] cursor-pointer"
+                    required={!files.license}
+                    className="sr-only"
                   />
-                  {files.license && (
-                    <span className="block text-[10px] text-emerald-700 mt-1 truncate">
+                  <div className="w-10 h-10 rounded-full bg-[#1F3D2B]/5 text-[#1F3D2B] group-hover:bg-[#D9A441]/20 flex items-center justify-center mb-2 transition">
+                    <svg className="w-5 h-5 text-[#1F3D2B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                  </div>
+                  <span className="block text-xs font-semibold text-[#1F3D2B] mb-1.5">
+                    1. Operating License
+                  </span>
+                  {files.license ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md max-w-full truncate">
                       ✓ {files.license.name}
                     </span>
+                  ) : (
+                    <span className="inline-block text-[11px] text-[#1F3D2B] font-medium py-1 px-3 rounded-lg bg-[#FAF8F5] border border-gray-200 group-hover:bg-[#D9A441] group-hover:text-[#1F3D2B] transition">
+                      Choose file
+                    </span>
                   )}
-                </div>
+                  <span className="text-[10px] text-gray-400 mt-1.5">PDF, JPG, PNG</span>
+                </label>
 
                 {/* 2. Identity Proof */}
-                <div className="border border-dashed border-[#C0B4A0] bg-white p-2.5 rounded-xl text-center">
-                  <span className="block text-[11px] font-medium text-gray-700 mb-1">
-                    2. Identity Proof
-                  </span>
+                <label className="relative border-2 border-dashed border-[#C0B4A0] hover:border-[#D9A441] bg-white p-4 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition duration-150 group hover:bg-[#FAF8F5]">
                   <input
                     type="file"
                     name="identity"
                     accept=".pdf,.jpg,.jpeg,.png"
                     onChange={handleFileChange}
-                    required
-                    className="text-[11px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:bg-[#1F3D2B] file:text-white hover:file:bg-[#162B1D] cursor-pointer"
+                    required={!files.identity}
+                    className="sr-only"
                   />
-                  {files.identity && (
-                    <span className="block text-[10px] text-emerald-700 mt-1 truncate">
+                  <div className="w-10 h-10 rounded-full bg-[#1F3D2B]/5 text-[#1F3D2B] group-hover:bg-[#D9A441]/20 flex items-center justify-center mb-2 transition">
+                    <svg className="w-5 h-5 text-[#1F3D2B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                    </svg>
+                  </div>
+                  <span className="block text-xs font-semibold text-[#1F3D2B] mb-1.5">
+                    2. Identity Proof
+                  </span>
+                  {files.identity ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md max-w-full truncate">
                       ✓ {files.identity.name}
                     </span>
+                  ) : (
+                    <span className="inline-block text-[11px] text-[#1F3D2B] font-medium py-1 px-3 rounded-lg bg-[#FAF8F5] border border-gray-200 group-hover:bg-[#D9A441] group-hover:text-[#1F3D2B] transition">
+                      Choose file
+                    </span>
                   )}
-                </div>
+                  <span className="text-[10px] text-gray-400 mt-1.5">PDF, JPG, PNG</span>
+                </label>
 
                 {/* 3. Authorization Letter */}
-                <div className="border border-dashed border-[#C0B4A0] bg-white p-2.5 rounded-xl text-center">
-                  <span className="block text-[11px] font-medium text-gray-700 mb-1">
-                    3. Authorization Letter
-                  </span>
+                <label className="relative border-2 border-dashed border-[#C0B4A0] hover:border-[#D9A441] bg-white p-4 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition duration-150 group hover:bg-[#FAF8F5]">
                   <input
                     type="file"
                     name="authorization"
                     accept=".pdf,.jpg,.jpeg,.png"
                     onChange={handleFileChange}
-                    required
-                    className="text-[11px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:bg-[#1F3D2B] file:text-white hover:file:bg-[#162B1D] cursor-pointer"
+                    required={!files.authorization}
+                    className="sr-only"
                   />
-                  {files.authorization && (
-                    <span className="block text-[10px] text-emerald-700 mt-1 truncate">
+                  <div className="w-10 h-10 rounded-full bg-[#1F3D2B]/5 text-[#1F3D2B] group-hover:bg-[#D9A441]/20 flex items-center justify-center mb-2 transition">
+                    <svg className="w-5 h-5 text-[#1F3D2B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                  </div>
+                  <span className="block text-xs font-semibold text-[#1F3D2B] mb-1.5">
+                    3. Authorization Letter
+                  </span>
+                  {files.authorization ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md max-w-full truncate">
                       ✓ {files.authorization.name}
                     </span>
+                  ) : (
+                    <span className="inline-block text-[11px] text-[#1F3D2B] font-medium py-1 px-3 rounded-lg bg-[#FAF8F5] border border-gray-200 group-hover:bg-[#D9A441] group-hover:text-[#1F3D2B] transition">
+                      Choose file
+                    </span>
                   )}
-                </div>
+                  <span className="text-[10px] text-gray-400 mt-1.5">PDF, JPG, PNG</span>
+                </label>
               </div>
             </div>
 
