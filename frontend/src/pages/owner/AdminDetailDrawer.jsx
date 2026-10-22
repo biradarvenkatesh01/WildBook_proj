@@ -125,7 +125,7 @@ export default function AdminDetailDrawer({ adminId, onClose, onUpdated }) {
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+          className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
           aria-label="Close details"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

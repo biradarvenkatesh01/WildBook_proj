@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import OwnerLayout from './OwnerLayout';
 import AdminDetailDrawer from './AdminDetailDrawer';
 import StatusBadge from '../../components/StatusBadge';
@@ -16,6 +16,7 @@ export default function AdminRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedAdminId, setSelectedAdminId] = useState(null);
+  const hasInitialized = useRef(false);
 
   // Fetch admin requests from API
   const fetchAdmins = useCallback(async (tab = activeTab, page = pagination.page, query = search, sort = sortField) => {
@@ -35,8 +36,9 @@ export default function AdminRequests() {
       setCounts(res.counts || { all: 0, pending: 0, approved: 0, rejected: 0, suspended: 0 });
       setPagination(res.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 });
 
-      // Automatically select first item if none is selected
-      if (!selectedAdminId && res.admins && res.admins.length > 0) {
+      // Automatically select first item on initial page load only
+      if (!hasInitialized.current && res.admins && res.admins.length > 0) {
+        hasInitialized.current = true;
         setSelectedAdminId(res.admins[0].user_id);
       }
     } catch (err) {
@@ -44,7 +46,7 @@ export default function AdminRequests() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, pagination.page, search, sortField, selectedAdminId]);
+  }, [activeTab, pagination.page, search, sortField]);
 
   useEffect(() => {
     fetchAdmins();
