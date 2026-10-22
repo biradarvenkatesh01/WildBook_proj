@@ -80,16 +80,23 @@ export default function ActivitiesSlots() {
   });
   const [activitySaving, setActivitySaving] = useState(false);
 
-  // Guides & Vehicles Modal
-  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
-  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+  // Guides & Vehicles Modal (Combined with tabs)
+  const [guidesVehiclesModal, setGuidesVehiclesModal] = useState({
+    isOpen: false,
+    activeTab: 'guides',
+  });
 
   // Check if routed specifically from /admin/guides
   useEffect(() => {
     if (location.pathname.includes('/admin/guides')) {
-      setIsGuideModalOpen(true);
+      const searchParams = new URLSearchParams(location.search);
+      const tabParam = searchParams.get('tab');
+      setGuidesVehiclesModal({
+        isOpen: true,
+        activeTab: tabParam === 'vehicles' ? 'vehicles' : 'guides',
+      });
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   // 1. Initial Load: Sanctuaries
   useEffect(() => {
@@ -340,17 +347,19 @@ export default function ActivitiesSlots() {
   };
 
   return (
-    <AdminLayout activeTitle="Manage activities and slots">
+    <AdminLayout activeTitle={location.pathname.includes('/admin/guides') ? 'Guides & Vehicles' : 'Manage activities and slots'}>
       <div className="p-6 md:p-8 max-w-[1700px] mx-auto min-h-screen flex flex-col">
         
         {/* ── Page Header (Image 19) ────────────────────────────────────────── */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-serif text-[#1F3D2B] font-bold">
-              Manage activities and slots
+              {location.pathname.includes('/admin/guides') ? 'Guides & Vehicles' : 'Manage activities and slots'}
             </h1>
             <p className="text-xs md:text-sm text-gray-500 mt-1">
-              Add, edit and manage activities and their weekly schedule.
+              {location.pathname.includes('/admin/guides')
+                ? 'Register and manage naturalist guides and safari vehicles for your sanctuary.'
+                : 'Add, edit and manage activities and their weekly schedule.'}
             </p>
           </div>
 
@@ -376,7 +385,7 @@ export default function ActivitiesSlots() {
             {/* Manage Guides Dialog Button */}
             <button
               type="button"
-              onClick={() => setIsGuideModalOpen(true)}
+              onClick={() => setGuidesVehiclesModal({ isOpen: true, activeTab: 'guides' })}
               className="px-3.5 py-2 rounded-xl bg-white border border-[#E5DAC6] hover:bg-gray-50 text-xs font-semibold text-[#1F3D2B] flex items-center gap-1.5 transition shadow-xs"
             >
               <span>👤 Guides ({guides.length})</span>
@@ -385,7 +394,7 @@ export default function ActivitiesSlots() {
             {/* Manage Vehicles Dialog Button */}
             <button
               type="button"
-              onClick={() => setIsVehicleModalOpen(true)}
+              onClick={() => setGuidesVehiclesModal({ isOpen: true, activeTab: 'vehicles' })}
               className="px-3.5 py-2 rounded-xl bg-white border border-[#E5DAC6] hover:bg-gray-50 text-xs font-semibold text-[#1F3D2B] flex items-center gap-1.5 transition shadow-xs"
             >
               <span>🚙 Vehicles ({vehicles.length})</span>
@@ -928,23 +937,20 @@ export default function ActivitiesSlots() {
         </div>
       )}
 
-      {/* ════ MODAL: Guides Management ═══════════════════════════════════════ */}
-      {isGuideModalOpen && (
-        <GuidesModal
-          sanctuaryId={selectedSanctuaryId}
+      {/* ════ MODAL: Combined Guides & Vehicles Management ══════════════════ */}
+      {guidesVehiclesModal.isOpen && (
+        <GuidesAndVehiclesModal
+          initialTab={guidesVehiclesModal.activeTab}
+          sanctuaryId={selectedSanctuaryId || sanctuaries[0]?.sanctuary_id}
+          sanctuaries={sanctuaries}
+          onSelectSanctuary={(id) => {
+            setSelectedSanctuaryId(id);
+            loadData(id, currentWeekMonday);
+          }}
           guides={guides}
-          onClose={() => setIsGuideModalOpen(false)}
-          onRefresh={() => loadData(selectedSanctuaryId, currentWeekMonday)}
-        />
-      )}
-
-      {/* ════ MODAL: Vehicles Management ═════════════════════════════════════ */}
-      {isVehicleModalOpen && (
-        <VehiclesModal
-          sanctuaryId={selectedSanctuaryId}
           vehicles={vehicles}
-          onClose={() => setIsVehicleModalOpen(false)}
-          onRefresh={() => loadData(selectedSanctuaryId, currentWeekMonday)}
+          onClose={() => setGuidesVehiclesModal((prev) => ({ ...prev, isOpen: false }))}
+          onRefresh={() => loadData(selectedSanctuaryId || sanctuaries[0]?.sanctuary_id, currentWeekMonday)}
         />
       )}
     </AdminLayout>
@@ -952,39 +958,73 @@ export default function ActivitiesSlots() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Subcomponent: Guides Dialog
+// Subcomponent: Unified Guides & Vehicles Dialog
 // ─────────────────────────────────────────────────────────────────────────────
-function GuidesModal({ sanctuaryId, guides, onClose, onRefresh }) {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [experience, setExperience] = useState('5');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+function GuidesAndVehiclesModal({
+  initialTab = 'guides',
+  sanctuaryId,
+  sanctuaries = [],
+  onSelectSanctuary,
+  guides = [],
+  vehicles = [],
+  onClose,
+  onRefresh,
+}) {
+  const [activeTab, setActiveTab] = useState(initialTab); // 'guides' | 'vehicles'
 
+  // Guide form state
+  const [guideName, setGuideName] = useState('');
+  const [guidePhone, setGuidePhone] = useState('');
+  const [guideExperience, setGuideExperience] = useState('5');
+  const [guideSaving, setGuideSaving] = useState(false);
+  const [guideError, setGuideError] = useState('');
+  const [guideSuccess, setGuideSuccess] = useState('');
+
+  // Vehicle form state
+  const [vehicleType, setVehicleType] = useState('');
+  const [capacity, setCapacity] = useState('6');
+  const [vehicleSaving, setVehicleSaving] = useState(false);
+  const [vehicleError, setVehicleError] = useState('');
+  const [vehicleSuccess, setVehicleSuccess] = useState('');
+
+  const effectiveSanctuaryId = sanctuaryId || (sanctuaries.length > 0 ? sanctuaries[0].sanctuary_id : null);
+  const currentSanctuary = sanctuaries.find((s) => s.sanctuary_id === effectiveSanctuaryId) || sanctuaries[0];
+
+  // ── Guide Handlers ─────────────────────────────────────────────────────────
   const handleAddGuide = async (e) => {
     e.preventDefault();
-    setError('');
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      setError('Guide phone number must be exactly 10 digits.');
+    setGuideError('');
+    setGuideSuccess('');
+
+    if (!effectiveSanctuaryId) {
+      setGuideError('No sanctuary selected. Please create or select a sanctuary first.');
       return;
     }
-    setSaving(true);
+
+    const cleanPhone = guidePhone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setGuideError('Guide phone number must be exactly 10 digits.');
+      return;
+    }
+
+    setGuideSaving(true);
     try {
       await client.post('/admin/guides', {
-        sanctuary_id: sanctuaryId,
-        name,
+        sanctuary_id: effectiveSanctuaryId,
+        name: guideName.trim(),
         phone: cleanPhone,
-        experience,
+        experience: guideExperience,
       });
-      setName('');
-      setPhone('');
-      setExperience('5');
+      setGuideName('');
+      setGuidePhone('');
+      setGuideExperience('5');
+      setGuideSuccess('Naturalist guide registered successfully!');
+      setTimeout(() => setGuideSuccess(''), 3000);
       onRefresh();
     } catch (err) {
-      setError(err.data?.error || err.message || 'Failed to add guide');
+      setGuideError(err.data?.error || err.message || 'Failed to add guide');
     } finally {
-      setSaving(false);
+      setGuideSaving(false);
     }
   };
 
@@ -998,116 +1038,48 @@ function GuidesModal({ sanctuaryId, guides, onClose, onRefresh }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-[#E5DAC6] shadow-xl animate-scaleUp">
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-          <h3 className="font-serif text-lg font-bold text-[#1F3D2B]">
-            Sanctuary Guides
-          </h3>
-          <button type="button" onClick={onClose} className="w-7 h-7 text-gray-400 hover:text-gray-700">✕</button>
-        </div>
-
-        {error && <div className="mb-3 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg">{error}</div>}
-
-        {/* Existing Guides List */}
-        <div className="max-h-48 overflow-y-auto space-y-2 mb-4 pr-1">
-          {guides.length === 0 ? (
-            <div className="text-center text-xs text-gray-400 py-4">No guides registered yet.</div>
-          ) : (
-            guides.map((g) => (
-              <div key={g.guide_id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl text-xs">
-                <div>
-                  <span className="font-semibold text-gray-800">{g.name}</span>
-                  <span className="text-gray-400 ml-2 font-mono">{g.phone}</span>
-                  <span className="text-gray-500 ml-2">({g.experience} yrs exp)</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteGuide(g.guide_id)}
-                  className="text-gray-400 hover:text-red-600 text-xs font-bold"
-                >
-                  ✕
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Add Guide Form */}
-        <form onSubmit={handleAddGuide} className="pt-3 border-t border-gray-100 space-y-3">
-          <h4 className="text-xs font-bold text-[#1F3D2B] uppercase tracking-wider">Register New Guide</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              placeholder="Guide Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="text-xs border rounded-lg p-2 focus:outline-none"
-            />
-            <input
-              type="tel"
-              inputMode="numeric"
-              pattern="[0-9]{10}"
-              maxLength={10}
-              placeholder="Phone (10 digits)"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-              required
-              className="text-xs border rounded-lg p-2 focus:outline-none font-mono"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min="0"
-              placeholder="Years of Experience"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              required
-              className="text-xs border rounded-lg p-2 w-36 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 py-2 bg-[#D9A441] text-[#1F3D2B] font-semibold text-xs rounded-lg hover:bg-[#c99534] transition"
-            >
-              {saving ? 'Adding...' : '+ Add Guide'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Subcomponent: Vehicles Dialog
-// ─────────────────────────────────────────────────────────────────────────────
-function VehiclesModal({ sanctuaryId, vehicles, onClose, onRefresh }) {
-  const [vehicleType, setVehicleType] = useState('');
-  const [capacity, setCapacity] = useState('6');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
+  // ── Vehicle Handlers ───────────────────────────────────────────────────────
   const handleAddVehicle = async (e) => {
     e.preventDefault();
-    setSaving(true);
-    setError('');
+    setVehicleSaving(true);
+    setVehicleError('');
+    setVehicleSuccess('');
+
+    if (!effectiveSanctuaryId) {
+      setVehicleError('No sanctuary selected. Please create or select a sanctuary first.');
+      setVehicleSaving(false);
+      return;
+    }
+
+    const cleanType = vehicleType.trim();
+    if (!cleanType) {
+      setVehicleError('Vehicle type or registration name is required.');
+      setVehicleSaving(false);
+      return;
+    }
+
+    const capNum = parseInt(capacity, 10);
+    if (isNaN(capNum) || capNum <= 0) {
+      setVehicleError('Passenger capacity must be at least 1.');
+      setVehicleSaving(false);
+      return;
+    }
+
     try {
       await client.post('/admin/vehicles', {
-        sanctuary_id: sanctuaryId,
-        vehicle_type: vehicleType,
-        capacity,
+        sanctuary_id: effectiveSanctuaryId,
+        vehicle_type: cleanType,
+        capacity: capNum,
       });
       setVehicleType('');
       setCapacity('6');
+      setVehicleSuccess('Safari vehicle registered successfully!');
+      setTimeout(() => setVehicleSuccess(''), 3000);
       onRefresh();
     } catch (err) {
-      setError(err.data?.error || err.message || 'Failed to add vehicle');
+      setVehicleError(err.data?.error || err.message || 'Failed to add vehicle');
     } finally {
-      setSaving(false);
+      setVehicleSaving(false);
     }
   };
 
@@ -1122,73 +1094,297 @@ function VehiclesModal({ sanctuaryId, vehicles, onClose, onRefresh }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-[#E5DAC6] shadow-xl animate-scaleUp">
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-          <h3 className="font-serif text-lg font-bold text-[#1F3D2B]">
-            Sanctuary Vehicles
-          </h3>
-          <button type="button" onClick={onClose} className="w-7 h-7 text-gray-400 hover:text-gray-700">✕</button>
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-xl w-full p-6 border border-[#E5DAC6] shadow-2xl animate-scaleUp flex flex-col max-h-[90vh]">
+        
+        {/* Header with Title and Sanctuary Switcher */}
+        <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4 shrink-0">
+          <div>
+            <h3 className="font-serif text-lg font-bold text-[#1F3D2B]">
+              Guides & Safari Vehicles
+            </h3>
+            {sanctuaries.length > 1 ? (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[11px] text-gray-500">Sanctuary:</span>
+                <select
+                  value={effectiveSanctuaryId || ''}
+                  onChange={(e) => onSelectSanctuary && onSelectSanctuary(Number(e.target.value))}
+                  className="text-xs font-semibold text-[#1F3D2B] bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none"
+                >
+                  {sanctuaries.map((s) => (
+                    <option key={s.sanctuary_id} value={s.sanctuary_id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : currentSanctuary ? (
+              <p className="text-xs text-[#1F3D2B] font-medium mt-0.5 flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>{currentSanctuary.name}</span>
+              </p>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition"
+            title="Close dialog"
+          >
+            ✕
+          </button>
         </div>
 
-        {error && <div className="mb-3 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg">{error}</div>}
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl mb-4 shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab('guides')}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
+              activeTab === 'guides'
+                ? 'bg-white text-[#1F3D2B] shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <span>👤 Naturalist Guides</span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              activeTab === 'guides' ? 'bg-[#EAF3EA] text-[#1F3D2B]' : 'bg-gray-200 text-gray-700'
+            }`}>
+              {guides.length}
+            </span>
+          </button>
 
-        {/* Existing Vehicles List */}
-        <div className="max-h-48 overflow-y-auto space-y-2 mb-4 pr-1">
-          {vehicles.length === 0 ? (
-            <div className="text-center text-xs text-gray-400 py-4">No vehicles registered yet.</div>
-          ) : (
-            vehicles.map((v) => (
-              <div key={v.vehicle_id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl text-xs">
-                <div>
-                  <span className="font-semibold text-gray-800">{v.vehicle_type}</span>
-                  <span className="text-[#1F3D2B] bg-[#EAF3EA] px-2 py-0.5 rounded-md font-bold text-[10px] ml-2">
-                    Max {v.capacity} seats
-                  </span>
+          <button
+            type="button"
+            onClick={() => setActiveTab('vehicles')}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
+              activeTab === 'vehicles'
+                ? 'bg-white text-[#1F3D2B] shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <span>🚙 Safari Vehicles</span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              activeTab === 'vehicles' ? 'bg-[#EAF3EA] text-[#1F3D2B]' : 'bg-gray-200 text-gray-700'
+            }`}>
+              {vehicles.length}
+            </span>
+          </button>
+        </div>
+
+        {/* ── TAB 1: GUIDES ─────────────────────────────────────────────────── */}
+        {activeTab === 'guides' && (
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {guideError && (
+              <div className="mb-3 text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
+                {guideError}
+              </div>
+            )}
+            {guideSuccess && (
+              <div className="mb-3 text-xs text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+                ✓ {guideSuccess}
+              </div>
+            )}
+
+            {/* Existing Guides List */}
+            <div className="flex-1 overflow-y-auto space-y-2 mb-4 pr-1 min-h-[140px] max-h-56">
+              {guides.length === 0 ? (
+                <div className="text-center text-xs text-gray-400 py-8 border border-dashed border-gray-200 rounded-xl">
+                  <p className="text-base mb-1">👤</p>
+                  <p>No naturalist guides registered yet.</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Use the form below to register your first guide.</p>
                 </div>
+              ) : (
+                guides.map((g) => (
+                  <div
+                    key={g.guide_id}
+                    className="flex items-center justify-between p-3 bg-gray-50 hover:bg-[#F9F7F3] rounded-xl text-xs border border-gray-100 transition"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-[#EAF3EA] text-[#1F3D2B] font-bold flex items-center justify-center text-xs">
+                        {g.name?.charAt(0)?.toUpperCase() || 'G'}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">{g.name}</div>
+                        <div className="text-gray-500 text-[11px] flex items-center gap-2 mt-0.5">
+                          <span className="font-mono text-gray-600">📞 {g.phone}</span>
+                          <span>•</span>
+                          <span className="text-emerald-700 font-medium">{g.experience} yrs exp</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteGuide(g.guide_id)}
+                      className="w-7 h-7 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition font-bold"
+                      title="Delete guide"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Add Guide Form */}
+            <form onSubmit={handleAddGuide} className="pt-3 border-t border-gray-100 space-y-2.5 shrink-0">
+              <h4 className="text-xs font-bold text-[#1F3D2B] uppercase tracking-wider">
+                Register New Naturalist Guide
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder="Guide Full Name"
+                  value={guideName}
+                  onChange={(e) => setGuideName(e.target.value)}
+                  required
+                  className="text-xs border border-gray-200 rounded-xl p-2.5 focus:border-[#D9A441] focus:outline-none"
+                />
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  placeholder="Phone (10 digits)"
+                  value={guidePhone}
+                  onChange={(e) => setGuidePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  required
+                  className="text-xs border border-gray-200 rounded-xl p-2.5 focus:border-[#D9A441] focus:outline-none font-mono"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="60"
+                  placeholder="Years of Exp"
+                  value={guideExperience}
+                  onChange={(e) => setGuideExperience(e.target.value)}
+                  required
+                  className="text-xs border border-gray-200 rounded-xl p-2.5 w-36 focus:border-[#D9A441] focus:outline-none"
+                />
                 <button
-                  type="button"
-                  onClick={() => handleDeleteVehicle(v.vehicle_id)}
-                  className="text-gray-400 hover:text-red-600 text-xs font-bold"
+                  type="submit"
+                  disabled={guideSaving}
+                  className="flex-1 py-2.5 bg-[#D9A441] text-[#1F3D2B] font-bold text-xs rounded-xl hover:bg-[#c99534] transition disabled:opacity-50"
                 >
-                  ✕
+                  {guideSaving ? 'Registering Guide...' : '+ Add Naturalist Guide'}
                 </button>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Add Vehicle Form */}
-        <form onSubmit={handleAddVehicle} className="pt-3 border-t border-gray-100 space-y-3">
-          <h4 className="text-xs font-bold text-[#1F3D2B] uppercase tracking-wider">Register New Vehicle</h4>
-          <input
-            type="text"
-            placeholder="Vehicle Type / Registration (e.g. 4x4 Safari Gypsy KA-09-1234)"
-            value={vehicleType}
-            onChange={(e) => setVehicleType(e.target.value)}
-            required
-            className="w-full text-xs border rounded-lg p-2 focus:outline-none"
-          />
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              placeholder="Passenger Capacity"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              required
-              className="text-xs border rounded-lg p-2 w-36 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 py-2 bg-[#D9A441] text-[#1F3D2B] font-semibold text-xs rounded-lg hover:bg-[#c99534] transition"
-            >
-              {saving ? 'Adding...' : '+ Add Vehicle'}
-            </button>
+            </form>
           </div>
-        </form>
+        )}
+
+        {/* ── TAB 2: VEHICLES ───────────────────────────────────────────────── */}
+        {activeTab === 'vehicles' && (
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {vehicleError && (
+              <div className="mb-3 text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
+                {vehicleError}
+              </div>
+            )}
+            {vehicleSuccess && (
+              <div className="mb-3 text-xs text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+                ✓ {vehicleSuccess}
+              </div>
+            )}
+
+            {/* Existing Vehicles List */}
+            <div className="flex-1 overflow-y-auto space-y-2 mb-4 pr-1 min-h-[140px] max-h-56">
+              {vehicles.length === 0 ? (
+                <div className="text-center text-xs text-gray-400 py-8 border border-dashed border-gray-200 rounded-xl">
+                  <p className="text-base mb-1">🚙</p>
+                  <p>No safari vehicles registered yet.</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Add safari jeeps, canters, or vans below.</p>
+                </div>
+              ) : (
+                vehicles.map((v) => (
+                  <div
+                    key={v.vehicle_id}
+                    className="flex items-center justify-between p-3 bg-gray-50 hover:bg-[#F9F7F3] rounded-xl text-xs border border-gray-100 transition"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-700 font-bold flex items-center justify-center text-xs">
+                        🚙
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">{v.vehicle_type}</div>
+                        <div className="text-gray-500 text-[11px] flex items-center gap-2 mt-0.5">
+                          <span className="text-[#1F3D2B] bg-[#EAF3EA] px-2 py-0.5 rounded-md font-bold text-[10px]">
+                            Max {v.capacity} seats
+                          </span>
+                          {v.total_slots > 0 && (
+                            <span className="text-gray-400 text-[10px]">
+                              • {v.total_slots} active slot{v.total_slots > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteVehicle(v.vehicle_id)}
+                      className="w-7 h-7 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition font-bold"
+                      title="Delete vehicle"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Add Vehicle Form */}
+            <form onSubmit={handleAddVehicle} className="pt-3 border-t border-gray-100 space-y-2.5 shrink-0">
+              <h4 className="text-xs font-bold text-[#1F3D2B] uppercase tracking-wider">
+                Register New Safari Vehicle
+              </h4>
+              <input
+                type="text"
+                placeholder="Vehicle Type / Reg (e.g. 4x4 Safari Gypsy KA-09-1234)"
+                value={vehicleType}
+                onChange={(e) => setVehicleType(e.target.value)}
+                maxLength={50}
+                required
+                className="w-full text-xs border border-gray-200 rounded-xl p-2.5 focus:border-[#D9A441] focus:outline-none"
+              />
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 border border-gray-200 rounded-xl px-2.5 py-1.5 w-48 bg-white">
+                  <span className="text-[11px] text-gray-500 whitespace-nowrap">Seats:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    placeholder="6"
+                    value={capacity}
+                    onChange={(e) => setCapacity(e.target.value)}
+                    required
+                    className="w-full text-xs font-semibold text-gray-800 focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={vehicleSaving}
+                  className="flex-1 py-2.5 bg-[#D9A441] text-[#1F3D2B] font-bold text-xs rounded-xl hover:bg-[#c99534] transition disabled:opacity-50"
+                >
+                  {vehicleSaving ? 'Registering Vehicle...' : '+ Add Safari Vehicle'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
       </div>
     </div>
   );
+}
+
+// Backward compatible aliases
+export function GuidesModal(props) {
+  return <GuidesAndVehiclesModal initialTab="guides" {...props} />;
+}
+
+export function VehiclesModal(props) {
+  return <GuidesAndVehiclesModal initialTab="vehicles" {...props} />;
 }
