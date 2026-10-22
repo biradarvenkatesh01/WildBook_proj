@@ -13,7 +13,7 @@ export default function AdminReports() {
       try {
         setLoading(true);
         const res = await api.get('/admin/reports');
-        setReports(res.data);
+        setReports(res?.data ?? res);
       } catch (err) {
         console.error('Failed to load admin reports:', err);
         setError('Failed to load operational reports.');

@@ -40,7 +40,7 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
         const res = await api.get('/admin/stats');
-        setStats(res.data);
+        setStats(res?.data ?? res);
       } catch (err) {
         console.error('Failed to load admin stats:', err);
         setError('Failed to load dashboard statistics.');
@@ -210,8 +210,8 @@ export default function AdminDashboard() {
               <h3 className="text-2xl font-serif font-bold text-[#1F3D2B] mt-1">
                 {loading ? '...' : (stats?.total_bookings || 0).toLocaleString()}
               </h3>
-              <p className="text-[10px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                <span>&uarr;</span> 12.5% vs last month
+              <p className="text-[10px] text-gray-400 font-medium mt-1">
+                Confirmed reservations
               </p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-[#F6F1E7] flex items-center justify-center text-xl text-[#1F3D2B]">
@@ -228,8 +228,8 @@ export default function AdminDashboard() {
               <h3 className="text-2xl font-serif font-bold text-[#1F3D2B] mt-1">
                 {loading ? '...' : formatCurrency(stats?.revenue_net || 0)}
               </h3>
-              <p className="text-[10px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                <span>&uarr;</span> 18.7% vs last month
+              <p className="text-[10px] text-gray-400 font-medium mt-1">
+                Net ticket earnings
               </p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-[#F6F1E7] flex items-center justify-center text-xl text-[#1F3D2B] font-serif font-bold">
@@ -246,8 +246,8 @@ export default function AdminDashboard() {
               <h3 className="text-2xl font-serif font-bold text-[#1F3D2B] mt-1">
                 {loading ? '...' : (stats?.upcoming_slots || 0).toLocaleString()}
               </h3>
-              <p className="text-[10px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                <span>&uarr;</span> Active schedule
+              <p className="text-[10px] text-gray-400 font-medium mt-1">
+                Scheduled active departures
               </p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-[#F6F1E7] flex items-center justify-center text-xl text-[#1F3D2B]">
@@ -261,9 +261,8 @@ export default function AdminDashboard() {
               <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                 Average rating
               </p>
-              <h3 className="text-2xl font-serif font-bold text-[#1F3D2B] mt-1 flex items-center gap-1.5">
-                {loading ? '...' : Number(stats?.average_rating || 5).toFixed(1)}
-                <span className="text-amber-500 text-lg">★</span>
+              <h3 className="text-2xl font-serif font-bold text-[#1F3D2B] mt-1">
+                {loading ? '...' : (stats?.review_count > 0 ? Number(stats.average_rating).toFixed(1) : '—')}
               </h3>
               <p className="text-[10px] text-gray-400 font-medium mt-1">
                 {stats?.review_count || 0} reviews received

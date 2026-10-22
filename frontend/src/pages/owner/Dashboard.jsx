@@ -40,7 +40,7 @@ export default function OwnerDashboard() {
       try {
         setLoading(true);
         const res = await api.get('/owner/stats');
-        setStats(res.data);
+        setStats(res?.data ?? res);
       } catch (err) {
         console.error('Failed to load owner stats:', err);
         setError('Failed to load authority statistics.');

@@ -13,7 +13,7 @@ export default function OwnerReports() {
       try {
         setLoading(true);
         const res = await api.get('/owner/reports');
-        setReports(res.data);
+        setReports(res?.data ?? res);
       } catch (err) {
         console.error('Failed to load owner reports:', err);
         setError('Failed to load platform reports.');
