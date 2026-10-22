@@ -158,7 +158,9 @@ export default function SanctuaryForm() {
   const handleFileUpload = async (filesToUpload) => {
     if (!filesToUpload || filesToUpload.length === 0) return;
 
-    if (!isEditMode) {
+    let targetId = id;
+
+    if (!isEditMode || !targetId) {
       // Must save basic draft first to obtain sanctuary_id
       if (!formData.name || !formData.location || !formData.description) {
         alert('Please fill in basic details and save the draft first before uploading images.');
@@ -167,12 +169,13 @@ export default function SanctuaryForm() {
       try {
         setSaving(true);
         const res = await client.post('/admin/sanctuaries', formData);
+        targetId = res.sanctuary_id;
         navigate(`/admin/sanctuaries/${res.sanctuary_id}/edit`, { replace: true });
-        // After navigate, will continue in edit mode
       } catch (err) {
         alert(err.data?.error || err.message || 'Please save the draft first.');
-        setSaving(false);
         return;
+      } finally {
+        setSaving(false);
       }
     }
 
@@ -186,13 +189,14 @@ export default function SanctuaryForm() {
       const data = new FormData();
       Array.from(filesToUpload).forEach((f) => data.append('images', f));
 
-      const res = await client.upload(`/admin/sanctuaries/${id}/images`, data);
+      const res = await client.upload(`/admin/sanctuaries/${targetId}/images`, data);
       setImages((prev) => [...prev, ...res.images]);
       setSuccessMsg('Images uploaded successfully.');
     } catch (err) {
       alert(err.data?.error || err.message || 'Image upload failed');
     } finally {
       setUploading(false);
+      setSaving(false);
     }
   };
 
