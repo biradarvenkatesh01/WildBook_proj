@@ -60,20 +60,14 @@ export default function OwnerLogin() {
         
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="mb-2">
-            <Logo portal="owner" size={48} />
-          </div>
-          <h2 className="text-2xl font-serif text-[#162B1D] tracking-wide">
-            WildBook
-          </h2>
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C8922A] block mt-0.5">
-            Authority Portal
-          </span>
+          <Link to="/" className="inline-block hover:opacity-90 transition mb-2" aria-label="WildBook Home">
+            <Logo portal="owner" size="lg" />
+          </Link>
+          <h1 className="sr-only">Authority Portal Login</h1>
+          <p className="text-xs text-gray-500 mt-1">
+            Sign in with your verified authority credentials
+          </p>
         </div>
-
-        <h1 className="text-xl font-medium text-center text-gray-800 mb-6">
-          Authority Portal
-        </h1>
 
         {/* Error Notification */}
         {error && (
