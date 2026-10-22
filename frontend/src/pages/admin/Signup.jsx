@@ -199,19 +199,19 @@ export default function AdminSignup() {
       </div>
 
       {/* ── Right Form Panel (Design 14) ───────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-10 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-2xl lg:max-w-3xl bg-white border border-[#E5DAC6] rounded-3xl p-8 sm:p-10 lg:p-12 shadow-xl shadow-[#1F3D2B]/5 my-6">
+      <div className="flex-1 flex items-start justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <div className="w-full max-w-2xl lg:max-w-3xl bg-white border border-[#E5DAC6] rounded-3xl p-6 sm:p-8 lg:p-9 shadow-xl shadow-[#1F3D2B]/5 my-2 sm:my-3">
           
-          <h1 className="text-3xl font-serif text-[#1F3D2B] mb-1">
+          <h1 className="text-2xl sm:text-3xl font-serif text-[#1F3D2B] mb-0.5">
             Register your sanctuary
           </h1>
-          <p className="text-xs text-gray-600 mb-6">
+          <p className="text-xs text-gray-600 mb-4">
             Your account will be reviewed and approved by the authority before you can list.
           </p>
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
               <svg className="w-4 h-4 shrink-0 mt-0.5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
               </svg>
@@ -219,7 +219,7 @@ export default function AdminSignup() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Operator Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -564,7 +564,7 @@ export default function AdminSignup() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-[#D9A441] text-[#1F3D2B] font-semibold text-sm hover:bg-[#c99534] active:scale-[0.99] transition shadow-md shadow-[#D9A441]/20 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full py-2.5 px-4 rounded-xl bg-[#D9A441] text-[#1F3D2B] font-semibold text-sm hover:bg-[#c99534] active:scale-[0.99] transition shadow-md shadow-[#D9A441]/20 disabled:opacity-70 disabled:cursor-not-allowed mt-1"
             >
               {loading ? (
                 <span className="inline-block w-4 h-4 border-2 border-[#1F3D2B]/30 border-t-[#1F3D2B] rounded-full animate-spin" />
@@ -575,7 +575,7 @@ export default function AdminSignup() {
           </form>
 
           {/* Login Link */}
-          <div className="text-center text-xs text-gray-600 mt-6">
+          <div className="text-center text-xs text-gray-600 mt-3.5">
             Already registered?{' '}
             <Link to="/admin/login" className="text-[#1F3D2B] hover:underline font-semibold">
               Log in
