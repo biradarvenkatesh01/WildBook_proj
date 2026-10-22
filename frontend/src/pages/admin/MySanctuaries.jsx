@@ -177,17 +177,52 @@ export default function MySanctuaries() {
                       <div className="py-2 px-3 rounded-xl bg-amber-50 text-amber-800 text-xs text-center border border-amber-200 font-medium">
                         Under authority review
                       </div>
+                    ) : sanctuary.listing_status === 'APPROVED' ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Live on Public Site
+                          </span>
+                          <Link
+                            to={`/sanctuaries/${sanctuary.sanctuary_id}`}
+                            target="_blank"
+                            className="font-bold underline text-emerald-900 hover:text-emerald-950"
+                          >
+                            View Live ↗
+                          </Link>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <Link
+                            to={`/admin/sanctuaries/${sanctuary.sanctuary_id}/edit`}
+                            className="flex-1 py-1.5 px-3 rounded-xl bg-white border border-[#D5C9B5] text-[#1F3D2B] font-medium text-xs hover:bg-gray-50 transition text-center"
+                          >
+                            Manage details
+                          </Link>
+                          <span className="text-[10px] text-gray-400">
+                            {sanctuary.image_count} photos
+                          </span>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="flex items-center justify-between gap-2">
-                        <Link
-                          to={`/admin/sanctuaries/${sanctuary.sanctuary_id}/edit`}
-                          className="flex-1 py-1.5 px-3 rounded-xl bg-white border border-[#D5C9B5] text-[#1F3D2B] font-medium text-xs hover:bg-gray-50 transition text-center"
-                        >
-                          Manage details
-                        </Link>
-                        <span className="text-[10px] text-gray-400">
-                          {sanctuary.image_count} photos
-                        </span>
+                      <div className="space-y-2">
+                        <div className="text-[11px] text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center justify-between">
+                          <span>Draft (Submit for approval to go live)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/admin/sanctuaries/${sanctuary.sanctuary_id}/edit`}
+                            className="flex-1 py-1.5 px-3 rounded-xl bg-white border border-[#D5C9B5] text-[#1F3D2B] font-medium text-xs hover:bg-gray-50 transition text-center"
+                          >
+                            Manage details
+                          </Link>
+                          <Link
+                            to={`/admin/sanctuaries/${sanctuary.sanctuary_id}/edit`}
+                            className="py-1.5 px-3 rounded-xl bg-[#D9A441] text-[#1F3D2B] font-bold text-xs hover:bg-[#c99534] transition text-center"
+                          >
+                            Submit
+                          </Link>
+                        </div>
                       </div>
                     )}
                   </div>

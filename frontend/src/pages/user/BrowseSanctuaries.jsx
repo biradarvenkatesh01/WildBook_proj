@@ -203,10 +203,11 @@ export default function BrowseSanctuaries() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sanctuaries.map((s) => {
                 const cover = s.cover_image || 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
-                const startingPrice = s.starting_price ? Number(s.starting_price) : 1500;
+                const startingPrice = s.starting_price ? Number(s.starting_price) : 200;
                 const formattedPrice = `from ₹${startingPrice.toLocaleString('en-IN')} / person`;
-                const ratingNum = s.average_rating > 0 ? Number(s.average_rating).toFixed(1) : '4.8';
-                const reviewCount = s.total_reviews > 0 ? s.total_reviews : 240;
+                const hasReviews = s.total_reviews > 0 && s.average_rating > 0;
+                const ratingNum = hasReviews ? Number(s.average_rating).toFixed(1) : null;
+                const reviewCount = s.total_reviews || 0;
 
                 return (
                   <div
@@ -226,9 +227,15 @@ export default function BrowseSanctuaries() {
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                         />
                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold text-[#1F3D2B] shadow-xs flex items-center gap-1">
-                          <span className="text-amber-500">★</span>
-                          <span>{ratingNum}</span>
-                          <span className="text-gray-400 font-normal">({reviewCount})</span>
+                          {hasReviews ? (
+                            <>
+                              <span className="text-amber-500">★</span>
+                              <span>{ratingNum}</span>
+                              <span className="text-gray-400 font-normal">({reviewCount})</span>
+                            </>
+                          ) : (
+                            <span className="text-emerald-800 font-semibold text-[11px]">🌿 New</span>
+                          )}
                         </div>
                       </div>
 
