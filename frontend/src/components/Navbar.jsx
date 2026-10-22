@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
+import NotificationDropdown from './NotificationDropdown';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -164,6 +165,8 @@ export default function Navbar() {
                   >
                     My Bookings
                   </Link>
+
+                  <NotificationDropdown portal="user" light />
 
                   <div className="relative" ref={avatarRef}>
                     <button

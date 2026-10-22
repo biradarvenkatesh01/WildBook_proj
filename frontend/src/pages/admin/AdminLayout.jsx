@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
+import NotificationDropdown from '../../components/NotificationDropdown';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AdminLayout({ children, activeTitle = 'Sanctuary Admin' }) {
@@ -55,17 +56,7 @@ export default function AdminLayout({ children, activeTitle = 'Sanctuary Admin' 
           {/* Right Header Controls */}
           <div className="flex items-center gap-4">
             {/* Notifications icon */}
-            <button
-              type="button"
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 relative"
-              title="Notifications"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="w-2 h-2 rounded-full bg-[#D9A441] absolute top-2 right-2" />
-            </button>
+            <NotificationDropdown portal="admin" />
 
             {/* Operator Profile */}
             <div className="flex items-center gap-3 pl-3 border-l border-gray-200">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import OwnerSidebar from '../../components/OwnerSidebar';
+import NotificationDropdown from '../../components/NotificationDropdown';
 import { useAuth } from '../../context/AuthContext';
 
 export default function OwnerLayout({ children, activeTitle = 'Authority Portal' }) {
@@ -58,6 +59,9 @@ export default function OwnerLayout({ children, activeTitle = 'Authority Portal'
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Authority Clearance Active
             </div>
+
+            {/* Notifications icon */}
+            <NotificationDropdown portal="owner" />
 
             <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
               <div className="text-right hidden sm:block">
