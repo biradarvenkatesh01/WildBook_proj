@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
 import NotificationDropdown from '../../components/NotificationDropdown';
 import { useAuth } from '../../context/AuthContext';
+import { InfoIcon, CloseIcon } from '../../components/Icons';
 
 export default function AdminLayout({ children, activeTitle = 'Sanctuary Admin' }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -88,16 +89,16 @@ export default function AdminLayout({ children, activeTitle = 'Sanctuary Admin' 
           {flash && (
             <div className="bg-[#D9A441] text-[#1F3D2B] px-6 py-3 text-xs font-semibold flex items-center justify-between border-b border-[#c8922a] shadow-xs">
               <div className="flex items-center gap-2">
-                <span>ℹ️</span>
+                <InfoIcon className="w-4 h-4 shrink-0 text-[#1F3D2B]" />
                 <span>{flash}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setFlash(null)}
-                className="text-xs px-2 py-0.5 rounded hover:bg-black/10 font-bold"
+                className="p-1 rounded hover:bg-black/10 transition"
                 aria-label="Dismiss alert"
               >
-                ✕
+                <CloseIcon className="w-3.5 h-3.5 text-[#1F3D2B]" />
               </button>
             </div>
           )}

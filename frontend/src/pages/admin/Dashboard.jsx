@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
+import { BarChartIcon, TicketIcon, LeafIcon } from '../../components/Icons';
 
 import {
   Chart as ChartJS,
@@ -186,7 +187,7 @@ export default function AdminDashboard() {
               to="/admin/reports"
               className="px-3.5 py-2 rounded-xl border border-[#E5DAC6] bg-white text-xs font-semibold text-[#1F3D2B] hover:bg-[#F6F1E7] transition shadow-xs flex items-center gap-1.5"
             >
-              <span>📊</span>
+              <BarChartIcon className="w-3.5 h-3.5 text-[#1F3D2B]" />
               <span>View Reports</span>
             </Link>
           </div>
@@ -214,8 +215,8 @@ export default function AdminDashboard() {
                 Confirmed reservations
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-[#F6F1E7] flex items-center justify-center text-xl text-[#1F3D2B]">
-              🎫
+            <div className="w-12 h-12 rounded-2xl bg-[#F6F1E7] flex items-center justify-center text-[#1F3D2B]">
+              <TicketIcon className="w-5 h-5 text-[#1F3D2B]" />
             </div>
           </div>
 
@@ -368,7 +369,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-3 px-5">
                         <div className="flex items-center gap-1.5 text-gray-700 font-medium">
-                          <span>🌿</span>
+                          <LeafIcon className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                           <span>{b.activity_name}</span>
                         </div>
                       </td>

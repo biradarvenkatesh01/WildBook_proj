@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import OwnerLayout from './OwnerLayout';
 import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
+import { UserIcon, LandmarkIcon, ShieldIcon, TicketIcon } from '../../components/Icons';
 
 import {
   Chart as ChartJS,
@@ -191,8 +192,8 @@ export default function OwnerDashboard() {
                 Awaiting your approval
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-xl text-[#162B1D]">
-              👤
+            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-[#162B1D]">
+              <UserIcon className="w-5 h-5 text-[#162B1D]" />
             </div>
           </Link>
 
@@ -212,8 +213,8 @@ export default function OwnerDashboard() {
                 Awaiting your approval
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-xl text-[#162B1D]">
-              🏛️
+            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-[#162B1D]">
+              <LandmarkIcon className="w-5 h-5 text-[#162B1D]" />
             </div>
           </Link>
 
@@ -233,8 +234,8 @@ export default function OwnerDashboard() {
                 Across the platform
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-xl text-[#162B1D]">
-              🛡️
+            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-[#162B1D]">
+              <ShieldIcon className="w-5 h-5 text-[#162B1D]" />
             </div>
           </Link>
 
@@ -251,8 +252,8 @@ export default function OwnerDashboard() {
                 All approved sanctuaries
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-xl text-[#162B1D]">
-              📅
+            <div className="w-12 h-12 rounded-2xl bg-[#E8EDE9] flex items-center justify-center text-[#162B1D]">
+              <TicketIcon className="w-5 h-5 text-[#162B1D]" />
             </div>
           </div>
 
@@ -348,7 +349,11 @@ export default function OwnerDashboard() {
                             ? 'bg-blue-50 text-blue-700 border border-blue-200'
                             : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         }`}>
-                          <span>{req.type === 'Admin Request' ? '👤' : '🏛️'}</span>
+                          {req.type === 'Admin Request' ? (
+                            <UserIcon className="w-3.5 h-3.5 text-blue-600" />
+                          ) : (
+                            <LandmarkIcon className="w-3.5 h-3.5 text-emerald-600" />
+                          )}
                           <span>{req.type}</span>
                         </span>
                       </td>

@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import CancelBookingModal from '../../components/CancelBookingModal';
 import client from '../../api/client';
+import { LeafIcon, ElephantIcon, TicketIcon, ClockIcon, UserIcon } from '../../components/Icons';
 
 export default function MyBookings() {
   const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming' | 'past' | 'cancelled'
@@ -179,7 +180,7 @@ export default function MyBookings() {
           </div>
         ) : bookings.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/80 shadow-xs max-w-lg mx-auto my-8">
-            <span className="text-4xl block mb-3">🌿</span>
+            <LeafIcon className="w-12 h-12 text-[#1F3D2B]/50 mx-auto mb-3" />
             <h3 className="text-xl font-serif font-bold text-[#1F3D2B] mb-2">
               No {activeTab} bookings
             </h3>
@@ -226,8 +227,8 @@ export default function MyBookings() {
                         className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover shrink-0 border border-stone-200"
                       />
                     ) : (
-                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-[#1F3D2B]/10 flex items-center justify-center text-3xl shrink-0">
-                        🐘
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-[#1F3D2B]/5 flex items-center justify-center shrink-0">
+                        <ElephantIcon className="w-10 h-10 text-[#1F3D2B]/60" />
                       </div>
                     )}
 
@@ -240,14 +241,14 @@ export default function MyBookings() {
                       </p>
 
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 pt-1">
-                        <span className="flex items-center gap-1">
-                          <span>📅</span> {dateFormatted}
+                        <span className="flex items-center gap-1.5">
+                          <TicketIcon className="w-3.5 h-3.5 text-gray-400" /> {dateFormatted}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <span>⏰</span> {b.slot_time}
+                        <span className="flex items-center gap-1.5">
+                          <ClockIcon className="w-3.5 h-3.5 text-gray-400" /> {b.slot_time}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <span>👥</span> {b.number_of_people}{' '}
+                        <span className="flex items-center gap-1.5">
+                          <UserIcon className="w-3.5 h-3.5 text-gray-400" /> {b.number_of_people}{' '}
                           {b.number_of_people === 1 ? 'Adult' : 'Adults'}
                         </span>
                       </div>

@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import client from '../../api/client';
+import { TreeIcon, LeafIcon } from '../../components/Icons';
 
 export default function SanctuaryDetail() {
   const { id } = useParams();
@@ -60,7 +61,7 @@ export default function SanctuaryDetail() {
       <div className="theme-user bg-[#F6F1E7] min-h-screen flex flex-col justify-between font-sans">
         <Navbar />
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <span className="text-4xl block mb-3">🌲</span>
+          <TreeIcon className="w-12 h-12 text-[#1F3D2B]/50 mx-auto mb-3" />
           <h1 className="text-2xl font-serif font-bold text-[#1F3D2B] mb-2">Sanctuary Not Found</h1>
           <p className="text-xs text-gray-600 mb-6 leading-relaxed">
             {error || 'This sanctuary is not currently listed on the public WildBook registry.'}
@@ -306,8 +307,8 @@ export default function SanctuaryDetail() {
                     <div className="pt-6 space-y-4">
                       {reviews.length === 0 ? (
                         <div className="py-8 text-center text-xs text-gray-500 bg-[#FAF8F5] rounded-xl border border-gray-100">
-                          <span className="text-2xl block mb-1">🌿</span>
-                          No reviews yet for this sanctuary.
+                          <LeafIcon className="w-6 h-6 text-emerald-800/50 mx-auto mb-2" />
+                          <p>No reviews yet for this sanctuary.</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

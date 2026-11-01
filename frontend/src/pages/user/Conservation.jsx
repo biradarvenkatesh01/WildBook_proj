@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { ElephantIcon, TreeIcon, UserIcon, BarChartIcon } from '../../components/Icons';
 
 export default function Conservation() {
   return (
@@ -43,7 +44,9 @@ export default function Conservation() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white rounded-3xl p-6 border border-[#E5DAC6] shadow-sm flex flex-col justify-between">
               <div>
-                <span className="text-3xl block mb-4">🐾</span>
+                <div className="w-12 h-12 rounded-2xl bg-[#1F3D2B]/5 text-[#1F3D2B] flex items-center justify-center mb-4">
+                  <ElephantIcon className="w-6 h-6 text-[#1F3D2B]" />
+                </div>
                 <h3 className="font-serif font-bold text-lg text-[#1F3D2B] mb-2">
                   Zero Stress Protocol
                 </h3>
@@ -55,7 +58,9 @@ export default function Conservation() {
 
             <div className="bg-white rounded-3xl p-6 border border-[#E5DAC6] shadow-sm flex flex-col justify-between">
               <div>
-                <span className="text-3xl block mb-4">🌲</span>
+                <div className="w-12 h-12 rounded-2xl bg-[#1F3D2B]/5 text-[#1F3D2B] flex items-center justify-center mb-4">
+                  <TreeIcon className="w-6 h-6 text-[#1F3D2B]" />
+                </div>
                 <h3 className="font-serif font-bold text-lg text-[#1F3D2B] mb-2">
                   Habitat Restoration
                 </h3>
@@ -67,7 +72,9 @@ export default function Conservation() {
 
             <div className="bg-white rounded-3xl p-6 border border-[#E5DAC6] shadow-sm flex flex-col justify-between">
               <div>
-                <span className="text-3xl block mb-4">👥</span>
+                <div className="w-12 h-12 rounded-2xl bg-[#1F3D2B]/5 text-[#1F3D2B] flex items-center justify-center mb-4">
+                  <UserIcon className="w-6 h-6 text-[#1F3D2B]" />
+                </div>
                 <h3 className="font-serif font-bold text-lg text-[#1F3D2B] mb-2">
                   Community Guides
                 </h3>
@@ -79,7 +86,9 @@ export default function Conservation() {
 
             <div className="bg-white rounded-3xl p-6 border border-[#E5DAC6] shadow-sm flex flex-col justify-between">
               <div>
-                <span className="text-3xl block mb-4">📊</span>
+                <div className="w-12 h-12 rounded-2xl bg-[#1F3D2B]/5 text-[#1F3D2B] flex items-center justify-center mb-4">
+                  <BarChartIcon className="w-6 h-6 text-[#1F3D2B]" />
+                </div>
                 <h3 className="font-serif font-bold text-lg text-[#1F3D2B] mb-2">
                   Transparent Auditing
                 </h3>

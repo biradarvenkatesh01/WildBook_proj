@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import client from '../../api/client';
+import { WarningIcon, LightningIcon, LandmarkIcon, ClockIcon } from '../../components/Icons';
 
 export default function Payment() {
   const { bookingId } = useParams();
@@ -143,7 +144,7 @@ export default function Payment() {
       <div className="theme-user bg-[#F6F1E7] min-h-screen flex flex-col justify-between font-sans">
         <Navbar />
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <span className="text-4xl block mb-3">⚠️</span>
+          <WarningIcon className="w-12 h-12 text-amber-600 mx-auto mb-3" />
           <h1 className="text-2xl font-serif font-bold text-[#1F3D2B] mb-2">Booking Not Found</h1>
           <p className="text-xs text-gray-600 mb-6">{error || 'This reservation does not exist or has expired.'}</p>
           <Link
@@ -187,7 +188,7 @@ export default function Payment() {
         {error && (
           <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-base">⚠️</span>
+              <WarningIcon className="w-4 h-4 text-red-600 shrink-0" />
               <span>{error}</span>
             </div>
             <button
@@ -234,7 +235,7 @@ export default function Payment() {
                     : 'bg-stone-100 text-gray-700 hover:bg-stone-200/80'
                 }`}
               >
-                <span>⚡</span>
+                <LightningIcon className="w-3.5 h-3.5" />
                 <span>UPI</span>
               </button>
 
@@ -247,7 +248,7 @@ export default function Payment() {
                     : 'bg-stone-100 text-gray-700 hover:bg-stone-200/80'
                 }`}
               >
-                <span>🏛️</span>
+                <LandmarkIcon className="w-3.5 h-3.5" />
                 <span>Net Banking</span>
               </button>
             </div>
@@ -503,7 +504,7 @@ export default function Payment() {
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 text-xs font-medium mb-1">
-                  <span>⏱️</span>
+                  <ClockIcon className="w-3.5 h-3.5" />
                   <span>{isExpired ? 'Hold Expired' : 'Your seats are held for'}</span>
                 </div>
                 <div className="text-2xl font-mono font-bold tracking-widest">

@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { useAuth } from '../../context/AuthContext';
 import client from '../../api/client';
+import { LeafIcon, ClockIcon, UserIcon, CarIcon, BackpackIcon } from '../../components/Icons';
 
 const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -157,7 +158,7 @@ export default function ActivitySlots() {
       <div className="theme-user bg-[#F6F1E7] min-h-screen flex flex-col justify-between font-sans">
         <Navbar />
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <span className="text-4xl block mb-3">🌿</span>
+          <LeafIcon className="w-12 h-12 text-[#1F3D2B]/50 mx-auto mb-3" />
           <h1 className="text-2xl font-serif font-bold text-[#1F3D2B] mb-2">Activity Unavailable</h1>
           <p className="text-xs text-gray-600 mb-6">{error || 'This activity is currently not available.'}</p>
           <Link
@@ -237,7 +238,7 @@ export default function ActivitySlots() {
               {/* Duration */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-sm shrink-0">
-                  ⏱️
+                  <ClockIcon className="w-4 h-4 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <span className="font-bold text-gray-800 block">Duration</span>
@@ -259,7 +260,7 @@ export default function ActivitySlots() {
               {/* Expert Guide */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-sm shrink-0">
-                  👤
+                  <UserIcon className="w-4 h-4 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <span className="font-bold text-gray-800 block">Expert Guide</span>
@@ -272,7 +273,7 @@ export default function ActivitySlots() {
               {/* Vehicle Type */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-sm shrink-0">
-                  🚙
+                  <CarIcon className="w-4 h-4 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <span className="font-bold text-gray-800 block">Vehicle Type</span>
@@ -285,7 +286,7 @@ export default function ActivitySlots() {
               {/* What to Carry */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-sm shrink-0">
-                  🎒
+                  <BackpackIcon className="w-4 h-4 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <span className="font-bold text-gray-800 block">What to Carry</span>

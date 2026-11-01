@@ -5,6 +5,7 @@ import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import client from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { LeafIcon, WarningIcon } from '../../components/Icons';
 
 const ID_TYPES = [
   { value: 'AADHAAR', label: 'Aadhaar Card' },
@@ -140,7 +141,7 @@ export default function BookingDetails() {
       <div className="theme-user bg-[#F6F1E7] min-h-screen flex flex-col justify-between font-sans">
         <Navbar />
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <span className="text-4xl block mb-3">🌿</span>
+          <LeafIcon className="w-12 h-12 text-[#1F3D2B]/50 mx-auto mb-3" />
           <h1 className="text-2xl font-serif font-bold text-[#1F3D2B] mb-2">Slot Not Found</h1>
           <p className="text-xs text-gray-600 mb-6">{error || 'This safari slot is no longer available.'}</p>
           <Link
@@ -380,7 +381,7 @@ export default function BookingDetails() {
 
                 {/* 40% Cancellation Warning */}
                 <div className="mt-4 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed flex items-start gap-2.5">
-                  <span className="text-sm">⚠️</span>
+                  <WarningIcon className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
                   <span>
                     <strong>Free cancellation is not available:</strong> 40% fee on cancellation.
                   </span>

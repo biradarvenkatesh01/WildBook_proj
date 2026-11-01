@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
 import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
+import { LeafIcon, UserIcon } from '../../components/Icons';
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState([]);
@@ -339,7 +340,7 @@ export default function AdminBookings() {
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2 text-gray-800">
-                          <span className="text-base">🌿</span>
+                          <LeafIcon className="w-4 h-4 text-emerald-700 shrink-0" />
                           <span className="font-medium">{b.activity_name}</span>
                         </div>
                       </td>
@@ -496,8 +497,8 @@ export default function AdminBookings() {
                         key={att.attendee_id}
                         className="p-4 rounded-xl border border-[#E5DAC6] bg-white shadow-2xs space-y-2 text-xs"
                       >
-                        <div className="flex items-center gap-2 text-amber-700 font-medium text-[11px]">
-                          <span>👤</span>
+                        <div className="flex items-center gap-1.5 text-amber-700 font-medium text-[11px]">
+                          <UserIcon className="w-3.5 h-3.5" />
                           <span>Attendee {idx + 1}</span>
                         </div>
                         <div>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import client from '../../api/client';
 import Logo from '../../components/Logo';
+import { LightningIcon } from '../../components/Icons';
 
 export default function AdminLogin() {
   const { login } = useAuth();
@@ -136,6 +137,57 @@ export default function AdminLogin() {
               )}
             </div>
           )}
+
+          {/* Demo Helper Card */}
+          <div className="mb-6 p-3.5 rounded-2xl bg-[#F6F1E7]/90 border border-[#D5C9B5] text-xs">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#D9A441] animate-pulse" />
+                <span>Demo Admin Accounts</span>
+              </div>
+              <span className="text-[10px] text-gray-500 font-mono">Password: Admin@123</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin.nagarhole@wildbook.com');
+                  setPassword('Admin@123');
+                  setError('');
+                }}
+                className="p-2.5 rounded-xl bg-white border border-[#D5C9B5] hover:border-[#1F3D2B] hover:shadow-xs text-left transition flex flex-col cursor-pointer group active:scale-98"
+              >
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
+                  <span className="text-[11px] font-bold text-[#1F3D2B] group-hover:text-[#D9A441] transition">
+                    Nagarhole Admin
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-500 truncate">
+                  admin.nagarhole@wildbook.com
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin.bandipur@wildbook.com');
+                  setPassword('Admin@123');
+                  setError('');
+                }}
+                className="p-2.5 rounded-xl bg-white border border-[#D5C9B5] hover:border-[#1F3D2B] hover:shadow-xs text-left transition flex flex-col cursor-pointer group active:scale-98"
+              >
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
+                  <span className="text-[11px] font-bold text-[#1F3D2B] group-hover:text-[#D9A441] transition">
+                    Bandipur Admin
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-500 truncate">
+                  admin.bandipur@wildbook.com
+                </span>
+              </button>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}

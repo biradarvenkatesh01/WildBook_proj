@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import client from '../../api/client';
 import Logo from '../../components/Logo';
+import { LightningIcon } from '../../components/Icons';
 
 export default function VisitorSignup() {
   const { login } = useAuth();
@@ -157,6 +158,38 @@ export default function VisitorSignup() {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Demo Helper Card */}
+          <div className="mb-5 p-3.5 rounded-2xl bg-[#F6F1E7]/90 border border-[#D5C9B5] text-xs">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#D9A441] animate-pulse" />
+                <span>Demo Registration Details</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const rand = Math.floor(100 + Math.random() * 900);
+                  setFormData({
+                    name: 'Aditi Rao',
+                    email: `aditi.rao${rand}@wildbook.com`,
+                    phone: '9876543210',
+                    password: 'Visitor@123',
+                    confirmPassword: 'Visitor@123',
+                    agreeTerms: true,
+                  });
+                  setError('');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#1F3D2B] text-white hover:bg-[#162B1D] font-medium text-[11px] transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
+                <span>Auto-fill Demo Data</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-[#666]">
+              Instantly fills valid visitor details with terms accepted for demonstration.
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}

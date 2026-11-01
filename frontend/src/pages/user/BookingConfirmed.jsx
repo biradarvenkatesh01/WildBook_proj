@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import client from '../../api/client';
+import { WarningIcon, TentIcon, TicketIcon, CameraIcon, ClockIcon, UserIcon } from '../../components/Icons';
 
 export default function BookingConfirmed() {
   const { id } = useParams();
@@ -79,7 +80,7 @@ export default function BookingConfirmed() {
       <div className="theme-user bg-[#F6F1E7] min-h-screen flex flex-col justify-between font-sans">
         <Navbar />
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <span className="text-4xl block mb-3">⚠️</span>
+          <WarningIcon className="w-12 h-12 text-amber-600 mx-auto mb-3" />
           <h1 className="text-2xl font-serif font-bold text-[#1F3D2B] mb-2">Booking Not Found</h1>
           <p className="text-xs text-gray-600 mb-6">{error || 'This booking confirmation could not be found.'}</p>
           <Link
@@ -161,7 +162,7 @@ export default function BookingConfirmed() {
           <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-10 text-xs">
             {/* Sanctuary */}
             <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/60 flex items-start gap-3">
-              <span className="text-lg">🏕️</span>
+              <TentIcon className="w-5 h-5 text-[#1F3D2B] shrink-0 mt-0.5" />
               <div>
                 <span className="text-gray-400 text-[10px] uppercase font-bold tracking-wider block">
                   Sanctuary
@@ -177,7 +178,7 @@ export default function BookingConfirmed() {
 
             {/* Date */}
             <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/60 flex items-start gap-3">
-              <span className="text-lg">📅</span>
+              <TicketIcon className="w-5 h-5 text-[#1F3D2B] shrink-0 mt-0.5" />
               <div>
                 <span className="text-gray-400 text-[10px] uppercase font-bold tracking-wider block">
                   Date
@@ -190,7 +191,7 @@ export default function BookingConfirmed() {
 
             {/* Activity */}
             <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/60 flex items-start gap-3">
-              <span className="text-lg">📷</span>
+              <CameraIcon className="w-5 h-5 text-[#1F3D2B] shrink-0 mt-0.5" />
               <div>
                 <span className="text-gray-400 text-[10px] uppercase font-bold tracking-wider block">
                   Activity
@@ -206,7 +207,7 @@ export default function BookingConfirmed() {
 
             {/* Time */}
             <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/60 flex items-start gap-3">
-              <span className="text-lg">⏰</span>
+              <ClockIcon className="w-5 h-5 text-[#1F3D2B] shrink-0 mt-0.5" />
               <div>
                 <span className="text-gray-400 text-[10px] uppercase font-bold tracking-wider block">
                   Departure Time
@@ -219,7 +220,7 @@ export default function BookingConfirmed() {
 
             {/* Attendees */}
             <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/60 flex items-start gap-3 sm:col-span-2">
-              <span className="text-lg">👥</span>
+              <UserIcon className="w-5 h-5 text-[#1F3D2B] shrink-0 mt-0.5" />
               <div>
                 <span className="text-gray-400 text-[10px] uppercase font-bold tracking-wider block">
                   Attendees ({booking.number_of_people})

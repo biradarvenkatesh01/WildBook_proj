@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import client from '../../api/client';
 import Logo from '../../components/Logo';
+import { LightningIcon } from '../../components/Icons';
 
 export default function OwnerLogin() {
   const { login } = useAuth();
@@ -91,6 +92,41 @@ export default function OwnerLogin() {
             )}
           </div>
         )}
+
+        {/* Demo Helper Card */}
+        <div className="mb-5 p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/80 text-xs">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5 font-semibold text-[#162B1D]">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#C8922A] animate-pulse" />
+              <span>Demo Authority Credentials</span>
+            </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('owner@wildbook.com');
+                  setPassword('Owner@123');
+                  setError('');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#162B1D] text-white hover:bg-[#0e1c12] font-medium text-[11px] transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <LightningIcon className="w-3.5 h-3.5 text-[#C8922A]" />
+                <span>Auto-fill</span>
+              </button>
+          </div>
+          <div 
+            onClick={() => {
+              setEmail('owner@wildbook.com');
+              setPassword('Owner@123');
+              setError('');
+            }}
+            className="text-[11px] text-gray-700 font-mono flex items-center justify-between bg-white/90 px-2.5 py-1.5 rounded-lg border border-amber-200 cursor-pointer hover:border-[#C8922A] transition"
+            title="Click to auto-fill"
+          >
+            <span className="font-medium text-[#162B1D]">owner@wildbook.com</span>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-600">Owner@123</span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}

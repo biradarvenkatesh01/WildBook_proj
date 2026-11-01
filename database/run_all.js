@@ -18,6 +18,7 @@ async function main() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || 'wildbook',
     multipleStatements: true,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
   };
 
   const pool = mysql.createPool(connectionConfig);

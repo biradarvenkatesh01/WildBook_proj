@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import client from '../../api/client';
+import { LeafIcon, StarIcon, MapPinIcon } from '../../components/Icons';
 
 const RATING_LABELS = {
   1: '1 Star — Poor experience',
@@ -96,7 +97,7 @@ export default function WriteReview() {
       <div className="theme-user bg-[#F6F1E7] min-h-screen flex flex-col justify-between font-sans">
         <Navbar />
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <span className="text-4xl block mb-3">🌿</span>
+          <LeafIcon className="w-12 h-12 text-[#1F3D2B]/50 mx-auto mb-3" />
           <h1 className="text-2xl font-serif font-bold text-[#1F3D2B] mb-2">Booking Not Found</h1>
           <p className="text-xs text-gray-600 mb-6">{error || 'This safari reservation could not be found.'}</p>
           <Link
@@ -152,8 +153,8 @@ export default function WriteReview() {
                 className="w-full h-48 rounded-xl object-cover border border-stone-200 shadow-xs"
               />
             ) : (
-              <div className="w-full h-48 rounded-xl bg-[#1F3D2B]/10 flex items-center justify-center text-4xl">
-                🌿
+              <div className="w-full h-48 rounded-xl bg-[#1F3D2B]/10 flex items-center justify-center">
+                <LeafIcon className="w-10 h-10 text-[#1F3D2B]/40" />
               </div>
             )}
 
@@ -161,8 +162,9 @@ export default function WriteReview() {
               <h2 className="font-serif font-bold text-lg text-[#1F3D2B]">
                 {booking.sanctuary_name}
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                <span>📍</span> {booking.sanctuary_location}
+              <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                <MapPinIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span>{booking.sanctuary_location}</span>
               </p>
             </div>
 
@@ -196,7 +198,7 @@ export default function WriteReview() {
           <div className="md:col-span-7">
             {alreadyReviewed ? (
               <div className="p-8 text-center bg-stone-50 rounded-2xl border border-stone-200">
-                <span className="text-3xl block mb-2">⭐</span>
+                <StarIcon className="w-8 h-8 text-amber-400 mx-auto mb-2 fill-amber-400" filled />
                 <h3 className="font-serif font-bold text-base text-[#1F3D2B] mb-1">
                   Review Already Submitted
                 </h3>
@@ -222,7 +224,7 @@ export default function WriteReview() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
                     Your Rating *
                   </label>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
@@ -230,10 +232,13 @@ export default function WriteReview() {
                         onClick={() => setRating(star)}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
-                        className="text-3xl sm:text-4xl text-amber-400 hover:scale-110 transition-transform focus:outline-none"
+                        className="text-amber-400 hover:scale-110 transition-transform focus:outline-none p-1"
                         aria-label={`Rate ${star} star`}
                       >
-                        {star <= activeRating ? '★' : '☆'}
+                        <StarIcon
+                          className={`w-8 h-8 ${star <= activeRating ? 'text-amber-400 fill-amber-400' : 'text-stone-300'}`}
+                          filled={star <= activeRating}
+                        />
                       </button>
                     ))}
                   </div>

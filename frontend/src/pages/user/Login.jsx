@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import client from '../../api/client';
 import Logo from '../../components/Logo';
+import { LightningIcon } from '../../components/Icons';
 
 export default function VisitorLogin() {
   const { login } = useAuth();
@@ -144,6 +145,41 @@ export default function VisitorLogin() {
               )}
             </div>
           )}
+
+          {/* Demo Helper Card */}
+          <div className="mb-6 p-3.5 rounded-2xl bg-[#F6F1E7]/90 border border-[#D5C9B5] text-xs">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#D9A441] animate-pulse" />
+                <span>Demo Visitor Credentials</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('visitor@wildbook.com');
+                  setPassword('Visitor@123');
+                  setError('');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#1F3D2B] text-white hover:bg-[#162B1D] font-medium text-[11px] transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
+                <span>Auto-fill</span>
+              </button>
+            </div>
+            <div 
+              onClick={() => {
+                setEmail('visitor@wildbook.com');
+                setPassword('Visitor@123');
+                setError('');
+              }}
+              className="text-[11px] text-gray-700 font-mono flex items-center justify-between bg-white/80 px-2.5 py-1.5 rounded-lg border border-[#E5DAC6] cursor-pointer hover:border-[#D9A441] transition"
+              title="Click to auto-fill"
+            >
+              <span className="font-medium text-[#1F3D2B]">visitor@wildbook.com</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-600">Visitor@123</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Address */}

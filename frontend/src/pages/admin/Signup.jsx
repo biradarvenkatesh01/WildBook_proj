@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import client from '../../api/client';
 import Logo from '../../components/Logo';
+import { LightningIcon } from '../../components/Icons';
 
 export default function AdminSignup() {
   const { login } = useAuth();
@@ -228,6 +229,55 @@ export default function AdminSignup() {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Demo Helper Card */}
+          <div className="mb-4 p-3.5 rounded-2xl bg-[#F6F1E7]/90 border border-[#D5C9B5] text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#D9A441] animate-pulse" />
+                <span>Demo Operator Registration</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const rand = Math.floor(100 + Math.random() * 900);
+                  setFormData({
+                    name: 'Dr. Rajesh Kumar',
+                    organisation_name: 'Kabini Wildlife Reserve',
+                    designation: 'Field Director',
+                    email: `director.kabini${rand}@wildbook.com`,
+                    phone: '9876501234',
+                    license_number: `KA-WLD-2026-${rand}`,
+                    registered_address: 'Range Forest Office, Kabini Gate, H.D. Kote Taluk, Karnataka 571114',
+                    website: 'https://kabini-reserve.gov.in',
+                    password: 'AdminSecret@123',
+                    confirmPassword: 'AdminSecret@123',
+                    agreeTerms: true,
+                  });
+
+                  // Generate 3 sample dummy PDF documents for seamless upload testing
+                  const dummyLicense = new File(['%PDF-1.4 demo operating license verification document'], 'demo_operator_license.pdf', { type: 'application/pdf' });
+                  const dummyIdentity = new File(['%PDF-1.4 demo government identity proof document'], 'demo_identity_proof.pdf', { type: 'application/pdf' });
+                  const dummyAuth = new File(['%PDF-1.4 demo forest department authorization letter'], 'demo_authorization_letter.pdf', { type: 'application/pdf' });
+
+                  setFiles({
+                    license: dummyLicense,
+                    identity: dummyIdentity,
+                    authorization: dummyAuth,
+                  });
+
+                  setError('');
+                }}
+                className="px-3 py-1.5 rounded-lg bg-[#1F3D2B] text-white hover:bg-[#162B1D] font-medium text-[11px] transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
+                <span>Auto-fill All Details & Documents</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-[#666]">
+              Populates complete operator profile and attaches sample PDF proofs for instant demo submission.
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {/* Operator Details */}

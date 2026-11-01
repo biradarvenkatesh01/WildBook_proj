@@ -3,6 +3,18 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 import NotificationDropdown from './NotificationDropdown';
 import { useAuth } from '../context/AuthContext';
+import {
+  InfoIcon,
+  CloseIcon,
+  TicketIcon,
+  LogoutIcon,
+  BarChartIcon,
+  BackpackIcon,
+  TreeIcon,
+  ShieldIcon,
+  UserIcon,
+  LandmarkIcon,
+} from './Icons';
 
 /**
  * Navbar — Visitor site header with dual dropdowns, role awareness, and keyboard navigation.
@@ -102,16 +114,16 @@ export default function Navbar() {
       {flash && (
         <div className="bg-[#D9A441] text-[#1F3D2B] px-4 py-2 text-xs font-semibold flex items-center justify-between border-b border-[#b88528]">
           <div className="max-w-7xl mx-auto flex items-center gap-2">
-            <span>ℹ️</span>
+            <InfoIcon className="w-4 h-4 shrink-0 text-[#1F3D2B]" />
             <span>{flash}</span>
           </div>
           <button
             type="button"
             onClick={() => setFlash(null)}
-            className="text-xs px-2 py-0.5 rounded hover:bg-black/10 font-bold"
+            className="p-1 rounded hover:bg-black/10 transition"
             aria-label="Dismiss alert"
           >
-            ✕
+            <CloseIcon className="w-3.5 h-3.5 text-[#1F3D2B]" />
           </button>
         </div>
       )}
@@ -199,7 +211,7 @@ export default function Navbar() {
                           onClick={() => setAvatarOpen(false)}
                           className="flex items-center gap-2 px-4 py-2 hover:bg-[#F6F1E7]/70 text-gray-700"
                         >
-                          <span>🎫</span>
+                          <TicketIcon className="w-4 h-4 text-[#D9A441]" />
                           <span>My Bookings</span>
                         </Link>
                         <hr className="my-1 border-gray-100" />
@@ -208,7 +220,7 @@ export default function Navbar() {
                           onClick={handleLogout}
                           className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
                         >
-                          <span>🚪</span>
+                          <LogoutIcon className="w-4 h-4 text-red-500" />
                           <span>Log out</span>
                         </button>
                       </div>
@@ -222,7 +234,7 @@ export default function Navbar() {
                     to={isAdmin ? (user?.account_status === 'PENDING' ? '/admin/pending' : '/admin') : '/owner'}
                     className="px-4 py-2 rounded-lg bg-[#D9A441] hover:bg-[#c99534] text-[#1F3D2B] font-semibold text-xs transition shadow-xs flex items-center gap-1.5"
                   >
-                    <span>📊</span>
+                    <BarChartIcon className="w-3.5 h-3.5 text-[#1F3D2B]" />
                     <span>Go to dashboard</span>
                   </Link>
                   <button
@@ -263,7 +275,9 @@ export default function Navbar() {
                         onClick={() => setLoginOpen(false)}
                         className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-[#F6F1E7]/70 text-gray-800 transition"
                       >
-                        <span className="text-base">🎒</span>
+                        <div className="p-1 rounded bg-[#1F3D2B]/5 text-[#1F3D2B] mt-0.5 shrink-0">
+                          <BackpackIcon className="w-4 h-4 text-[#1F3D2B]" />
+                        </div>
                         <div>
                           <div className="font-semibold text-gray-900">Visitor login</div>
                           <div className="text-[10px] text-gray-400">Explore & book safaris</div>
@@ -274,7 +288,9 @@ export default function Navbar() {
                         onClick={() => setLoginOpen(false)}
                         className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-[#F6F1E7]/70 text-gray-800 transition"
                       >
-                        <span className="text-base">🌲</span>
+                        <div className="p-1 rounded bg-[#1F3D2B]/5 text-[#1F3D2B] mt-0.5 shrink-0">
+                          <TreeIcon className="w-4 h-4 text-[#1F3D2B]" />
+                        </div>
                         <div>
                           <div className="font-semibold text-gray-900">Sanctuary admin login</div>
                           <div className="text-[10px] text-gray-400">Operator portal</div>
@@ -285,7 +301,9 @@ export default function Navbar() {
                         onClick={() => setLoginOpen(false)}
                         className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-[#F6F1E7]/70 text-gray-800 transition"
                       >
-                        <span className="text-base">🛡️</span>
+                        <div className="p-1 rounded bg-[#1F3D2B]/5 text-[#1F3D2B] mt-0.5 shrink-0">
+                          <ShieldIcon className="w-4 h-4 text-[#1F3D2B]" />
+                        </div>
                         <div>
                           <div className="font-semibold text-gray-900">Authority login</div>
                           <div className="text-[10px] text-gray-400">Site authority clearance</div>
@@ -320,7 +338,9 @@ export default function Navbar() {
                         onClick={() => setSignupOpen(false)}
                         className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-[#F6F1E7]/70 text-gray-800 transition"
                       >
-                        <span className="text-base">👤</span>
+                        <div className="p-1 rounded bg-[#1F3D2B]/5 text-[#1F3D2B] mt-0.5 shrink-0">
+                          <UserIcon className="w-4 h-4 text-[#1F3D2B]" />
+                        </div>
                         <div>
                           <div className="font-semibold text-gray-900">Visitor signup</div>
                           <div className="text-[10px] text-gray-400">Create traveller account</div>
@@ -331,7 +351,9 @@ export default function Navbar() {
                         onClick={() => setSignupOpen(false)}
                         className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-[#F6F1E7]/70 text-gray-800 transition"
                       >
-                        <span className="text-base">🏛️</span>
+                        <div className="p-1 rounded bg-[#1F3D2B]/5 text-[#1F3D2B] mt-0.5 shrink-0">
+                          <LandmarkIcon className="w-4 h-4 text-[#1F3D2B]" />
+                        </div>
                         <div>
                           <div className="font-semibold text-gray-900">Register your sanctuary</div>
                           <div className="text-[10px] text-gray-400">Operator application</div>

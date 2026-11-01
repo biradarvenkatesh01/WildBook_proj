@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { LeafIcon, ElephantIcon, ShieldIcon } from '../../components/Icons';
 
 export default function About() {
   return (
@@ -63,8 +64,8 @@ export default function About() {
 
             <div className="bg-white rounded-3xl p-8 border border-[#E5DAC6] shadow-sm space-y-6">
               <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-lg shrink-0">
-                  🌿
+                <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-gray-200 flex items-center justify-center shrink-0">
+                  <LeafIcon className="w-5 h-5 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <h3 className="font-serif font-bold text-base text-[#1F3D2B] mb-1">
@@ -77,8 +78,8 @@ export default function About() {
               </div>
 
               <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-lg shrink-0">
-                  🐆
+                <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-gray-200 flex items-center justify-center shrink-0">
+                  <ElephantIcon className="w-5 h-5 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <h3 className="font-serif font-bold text-base text-[#1F3D2B] mb-1">
@@ -91,8 +92,8 @@ export default function About() {
               </div>
 
               <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-gray-200 flex items-center justify-center text-lg shrink-0">
-                  🛡️
+                <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-gray-200 flex items-center justify-center shrink-0">
+                  <ShieldIcon className="w-5 h-5 text-[#1F3D2B]" />
                 </div>
                 <div>
                   <h3 className="font-serif font-bold text-base text-[#1F3D2B] mb-1">

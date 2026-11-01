@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import client from '../../api/client';
+import { UserIcon, CarIcon, CloseIcon } from '../../components/Icons';
 
 // Distinct pastel color palette for activity cards matching Image 19
 const ACTIVITY_COLORS = [
@@ -388,7 +389,8 @@ export default function ActivitiesSlots() {
               onClick={() => setGuidesVehiclesModal({ isOpen: true, activeTab: 'guides' })}
               className="px-3.5 py-2 rounded-xl bg-white border border-[#E5DAC6] hover:bg-gray-50 text-xs font-semibold text-[#1F3D2B] flex items-center gap-1.5 transition shadow-xs"
             >
-              <span>👤 Guides ({guides.length})</span>
+              <UserIcon className="w-3.5 h-3.5 text-[#1F3D2B]" />
+              <span>Guides ({guides.length})</span>
             </button>
 
             {/* Manage Vehicles Dialog Button */}
@@ -397,7 +399,8 @@ export default function ActivitiesSlots() {
               onClick={() => setGuidesVehiclesModal({ isOpen: true, activeTab: 'vehicles' })}
               className="px-3.5 py-2 rounded-xl bg-white border border-[#E5DAC6] hover:bg-gray-50 text-xs font-semibold text-[#1F3D2B] flex items-center gap-1.5 transition shadow-xs"
             >
-              <span>🚙 Vehicles ({vehicles.length})</span>
+              <CarIcon className="w-3.5 h-3.5 text-[#1F3D2B]" />
+              <span>Vehicles ({vehicles.length})</span>
             </button>
           </div>
         </div>
@@ -611,13 +614,15 @@ export default function ActivitiesSlots() {
                               </div>
 
                               {/* Guide */}
-                              <div className="text-[10px] text-gray-600 flex items-center gap-1 truncate mb-0.5">
-                                <span className="opacity-70">👤</span> {slot.guide_name}
+                              <div className="text-[10px] text-gray-600 flex items-center gap-1.5 truncate mb-0.5">
+                                <UserIcon className="w-3 h-3 text-gray-500 shrink-0" />
+                                <span className="truncate">{slot.guide_name}</span>
                               </div>
 
                               {/* Vehicle */}
-                              <div className="text-[10px] text-gray-600 flex items-center gap-1 truncate mb-1">
-                                <span className="opacity-70">🚗</span> {slot.vehicle_type}
+                              <div className="text-[10px] text-gray-600 flex items-center gap-1.5 truncate mb-1">
+                                <CarIcon className="w-3 h-3 text-gray-500 shrink-0" />
+                                <span className="truncate">{slot.vehicle_type}</span>
                               </div>
 
                               {/* Seats Booked / Capacity */}
@@ -1132,7 +1137,7 @@ function GuidesAndVehiclesModal({
             className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition"
             title="Close dialog"
           >
-            ✕
+            <CloseIcon className="w-4 h-4" />
           </button>
         </div>
 
@@ -1147,7 +1152,8 @@ function GuidesAndVehiclesModal({
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <span>👤 Naturalist Guides</span>
+            <UserIcon className="w-3.5 h-3.5" />
+            <span>Naturalist Guides</span>
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
               activeTab === 'guides' ? 'bg-[#EAF3EA] text-[#1F3D2B]' : 'bg-gray-200 text-gray-700'
             }`}>
@@ -1164,7 +1170,8 @@ function GuidesAndVehiclesModal({
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <span>🚙 Safari Vehicles</span>
+            <CarIcon className="w-3.5 h-3.5" />
+            <span>Safari Vehicles</span>
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
               activeTab === 'vehicles' ? 'bg-[#EAF3EA] text-[#1F3D2B]' : 'bg-gray-200 text-gray-700'
             }`}>
@@ -1191,7 +1198,7 @@ function GuidesAndVehiclesModal({
             <div className="flex-1 overflow-y-auto space-y-2 mb-4 pr-1 min-h-[140px] max-h-56">
               {guides.length === 0 ? (
                 <div className="text-center text-xs text-gray-400 py-8 border border-dashed border-gray-200 rounded-xl">
-                  <p className="text-base mb-1">👤</p>
+                  <UserIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                   <p>No naturalist guides registered yet.</p>
                   <p className="text-[11px] text-gray-400 mt-0.5">Use the form below to register your first guide.</p>
                 </div>

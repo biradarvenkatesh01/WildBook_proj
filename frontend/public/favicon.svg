@@ -1,24 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Forest Squircle Background with Amber Rim -->
-  <rect x="2" y="2" width="60" height="60" rx="16" fill="#163522" stroke="#D9A441" stroke-width="2.5"/>
-  <rect x="5" y="5" width="54" height="54" rx="13" fill="#11291A" opacity="0.45"/>
-  
-  <!-- WildBook Iconic Leaf & Book Mark -->
-  <g transform="translate(5, 5) scale(1.125)">
-    <!-- Leaf Silhouette / Book Open Page -->
-    <path d="M24 5C24 5 9 14.5 9 28C9 36.5 15.8 43 24 43C32.2 43 39 36.5 39 28C39 14.5 24 5 24 5Z" 
-          fill="#F6F1E7" fill-opacity="0.22" 
-          stroke="#F6F1E7" stroke-width="2.8" stroke-linejoin="round"/>
-    
-    <!-- Central Golden Spine -->
-    <line x1="24" y1="6" x2="24" y2="43" stroke="#D9A441" stroke-width="3.5" stroke-linecap="round"/>
-    
-    <!-- Botanical Vein / Page Lines -->
-    <path d="M24 16 L15 22.5" stroke="#F6F1E7" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.95"/>
-    <path d="M24 23 L33 29.5" stroke="#F6F1E7" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.95"/>
-    <path d="M24 30 L15 36.5" stroke="#F6F1E7" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.95"/>
-    
-    <!-- Golden Apex Crown Jewel -->
-    <circle cx="24" cy="6" r="3.2" fill="#D9A441" stroke="#163522" stroke-width="1"/>
-  </g>
+  <defs>
+    <linearGradient id="fav-gold" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F3C368" />
+      <stop offset="100%" stop-color="#D9A441" />
+    </linearGradient>
+    <linearGradient id="fav-bg" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#163522" />
+      <stop offset="100%" stop-color="#0E2115" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Forest Squircle with Gold Border -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#fav-bg)" stroke="url(#fav-gold)" stroke-width="2.5"/>
+
+  <!-- Hexagonal Botanical Geometric Ring -->
+  <path d="M32 9L50 19.5V40.5L32 51L14 40.5V19.5L32 9Z" stroke="url(#fav-gold)" stroke-width="1.5" stroke-opacity="0.5" fill="none"/>
+
+  <!-- Sun Rays Horizon -->
+  <circle cx="32" cy="24" r="9" fill="url(#fav-gold)" fill-opacity="0.25" />
+  <path d="M32 12V16" stroke="url(#fav-gold)" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M23 15L26 19" stroke="url(#fav-gold)" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M41 15L38 19" stroke="url(#fav-gold)" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Open Chronicle Book Pages / Wings -->
+  <path d="M32 44C32 44 23 40 16 42V26C23 24 30 28 32 30C34 28 41 24 48 26V42C41 40 32 44 32 44Z" fill="#F6F1E7"/>
+
+  <!-- Golden Central Spine -->
+  <path d="M32 23C32 23 29.5 28 29.5 33C29.5 39 32 45 32 45C32 45 34.5 39 34.5 33C34.5 28 32 23 32 23Z" fill="url(#fav-gold)"/>
+
+  <!-- Apex Gold Star -->
+  <polygon points="32,8 33.2,11.5 37,11.5 34,13.5 35.2,17 32,15 28.8,17 30,13.5 27,11.5 30.8,11.5" fill="url(#fav-gold)"/>
 </svg>
