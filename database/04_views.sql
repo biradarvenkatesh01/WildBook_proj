@@ -1,11 +1,10 @@
 -- ==============================================================================
--- WildBook: 04_views.sql
--- Views for Public Discovery, Slot Availability & Confirmed Bookings
+-- WildBook: 04_views.sql (Optimized 9-Table Views)
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
 -- 1. VIEW: v_public_sanctuaries
--- Approved sanctuaries with cover image, average rating, and review count
+-- Approved sanctuaries with direct cover image and ratings
 -- ------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW v_public_sanctuaries AS
 SELECT 
@@ -22,20 +21,12 @@ SELECT
   s.best_time_to_visit,
   s.latitude,
   s.longitude,
-  (
-    SELECT si.image_path 
-    FROM sanctuary_images si 
-    WHERE si.sanctuary_id = s.sanctuary_id 
-    ORDER BY si.is_cover DESC, si.sort_order ASC, si.image_id ASC 
-    LIMIT 1
-  ) AS cover_image,
-  COALESCE(ROUND(AVG(r.rating), 1), 0.0) AS average_rating,
-  COUNT(r.review_id) AS total_reviews,
+  s.cover_image,
+  s.average_rating,
+  s.total_reviews,
   s.created_at
 FROM sanctuaries s
-LEFT JOIN reviews r ON s.sanctuary_id = r.sanctuary_id
-WHERE s.listing_status = 'APPROVED'
-GROUP BY s.sanctuary_id;
+WHERE s.listing_status = 'APPROVED';
 
 -- ------------------------------------------------------------------------------
 -- 2. VIEW: v_slot_availability
@@ -103,11 +94,8 @@ SELECT
   v.vehicle_type,
   b.number_of_people,
   b.total_amount,
-  b.status AS booking_status,
-  p.payment_id,
   p.payment_status,
   p.transaction_ref,
-  p.paid_at,
   b.booked_at
 FROM bookings b
 JOIN users u ON b.user_id = u.user_id

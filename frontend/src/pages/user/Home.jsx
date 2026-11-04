@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import client from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 
 // Animal photo slides for Hero Carousel
 const HERO_SLIDES = [
@@ -29,6 +30,7 @@ const HERO_SLIDES = [
 ];
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +52,7 @@ export default function Home() {
     async function loadFeatured() {
       try {
         setLoadingFeatured(true);
-        const res = await client.get('/sanctuaries/featured?limit=3');
+        const res = await client.get('/sanctuaries/featured?limit=6');
         setFeaturedSanctuaries(res.sanctuaries || []);
       } catch (err) {
         console.warn('Failed to load featured sanctuaries:', err);
@@ -206,7 +208,7 @@ export default function Home() {
         </div>
 
         {/* Featured Sanctuaries Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loadingFeatured ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-80 rounded-2xl bg-white/60 animate-pulse border border-[#E5DAC6]" />
@@ -279,8 +281,65 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════
-          CHOOSE HOW YOU WANT TO CONTINUE (Portal Gateway)
+          CHOOSE HOW YOU WANT TO CONTINUE (Portal Gateway / Active Session)
       ════════════════════════════════════════════════════════════════════════ */}
+      {isAuthenticated ? (
+        <section className="py-10 bg-[#F6F1E7]/70 border-t border-[#E5DAC6]">
+          <div className="max-w-5xl mx-auto px-6 sm:px-8">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DAC6] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#1F3D2B] text-[#D9A441] flex items-center justify-center font-serif font-bold text-lg shadow-xs shrink-0">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'W'}
+                </div>
+                <div>
+                  <span className="text-[11px] uppercase font-bold tracking-wider text-[#D9A441] block">
+                    Active Session
+                  </span>
+                  <h3 className="text-xl font-serif font-bold text-[#1F3D2B]">
+                    Welcome back, {user?.name || 'Explorer'}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Signed in as <span className="font-semibold text-gray-700 capitalize">{user?.role?.toLowerCase()?.replace('_', ' ')}</span> ({user?.email})
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {user?.role === 'ADMIN' ? (
+                  <Link
+                    to="/admin"
+                    className="flex-1 sm:flex-none text-center px-6 py-2.5 rounded-xl bg-[#1F3D2B] text-white hover:bg-[#152a1d] font-semibold text-xs transition shadow-xs"
+                  >
+                    Go to Admin Dashboard &rarr;
+                  </Link>
+                ) : user?.role === 'SITE_OWNER' ? (
+                  <Link
+                    to="/owner"
+                    className="flex-1 sm:flex-none text-center px-6 py-2.5 rounded-xl bg-[#1F3D2B] text-white hover:bg-[#152a1d] font-semibold text-xs transition shadow-xs"
+                  >
+                    Go to Authority Portal &rarr;
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to="/my-bookings"
+                      className="flex-1 sm:flex-none text-center px-5 py-2.5 rounded-xl bg-[#D9A441] text-[#1F3D2B] hover:bg-[#c99534] font-semibold text-xs transition shadow-xs"
+                    >
+                      My Bookings &rarr;
+                    </Link>
+                    <Link
+                      to="/sanctuaries"
+                      className="flex-1 sm:flex-none text-center px-5 py-2.5 rounded-xl border border-[#1F3D2B] text-[#1F3D2B] hover:bg-[#1F3D2B] hover:text-white font-semibold text-xs transition shadow-xs"
+                    >
+                      Book a Safari
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
       <section className="py-16 bg-[#F6F1E7]/70 border-t border-[#E5DAC6]">
         <div className="max-w-5xl mx-auto px-6 sm:px-8">
           
@@ -380,6 +439,7 @@ export default function Home() {
 
         </div>
       </section>
+      )}
 
       {/* ════════════════════════════════════════════════════════════════════════
           3. WAYS TO EXPLORE (Safari Experiences)

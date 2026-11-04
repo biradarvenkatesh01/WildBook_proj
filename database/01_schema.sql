@@ -1,24 +1,26 @@
 -- ==============================================================================
--- WildBook: 01_schema.sql
--- Normalized 3NF/BCNF Schema for Wildlife Sanctuary & Safari Reservation System
+-- WildBook: 01_schema.sql (Optimized 9-Table Schema)
+-- Fully Normalized Schema for Wildlife Sanctuary & Safari Reservation System
 -- ==============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS reviews;
-DROP TABLE IF EXISTS cancellations;
 DROP TABLE IF EXISTS payments;
-DROP TABLE IF EXISTS booking_attendees;
 DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS slots;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS guides;
 DROP TABLE IF EXISTS activities;
-DROP TABLE IF EXISTS sanctuary_images;
 DROP TABLE IF EXISTS sanctuaries;
-DROP TABLE IF EXISTS admin_documents;
 DROP TABLE IF EXISTS admin_profiles;
 DROP TABLE IF EXISTS users;
+
+-- Clean legacy 14-table names if present
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS cancellations;
+DROP TABLE IF EXISTS booking_attendees;
+DROP TABLE IF EXISTS sanctuary_images;
+DROP TABLE IF EXISTS admin_documents;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -40,7 +42,7 @@ CREATE TABLE users (
     REFERENCES users(user_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2. ADMIN_PROFILES: 1:1 metadata for sanctuary administrators
+-- 2. ADMIN_PROFILES: 1:1 metadata and verification document filepaths for operators
 CREATE TABLE admin_profiles (
   user_id INT PRIMARY KEY,
   organisation_name VARCHAR(150) NOT NULL,
@@ -48,28 +50,23 @@ CREATE TABLE admin_profiles (
   designation VARCHAR(100) NOT NULL,
   registered_address TEXT NOT NULL,
   website VARCHAR(255) NULL,
+  license_doc VARCHAR(255) NULL,
+  identity_doc VARCHAR(255) NULL,
+  auth_letter_doc VARCHAR(255) NULL,
   CONSTRAINT fk_admin_profiles_user FOREIGN KEY (user_id) 
     REFERENCES users(user_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3. ADMIN_DOCUMENTS: verification documents submitted during admin onboarding
-CREATE TABLE admin_documents (
-  document_id INT AUTO_INCREMENT PRIMARY KEY,
-  admin_id INT NOT NULL,
-  doc_type ENUM('LICENSE', 'IDENTITY', 'AUTHORIZATION') NOT NULL,
-  file_path VARCHAR(255) NOT NULL,
-  uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_admin_documents_admin FOREIGN KEY (admin_id) 
-    REFERENCES users(user_id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 4. SANCTUARIES: wildlife parks and reserves managed by approved admins
+-- 3. SANCTUARIES: wildlife parks and reserves managed by approved admins
 CREATE TABLE sanctuaries (
   sanctuary_id INT AUTO_INCREMENT PRIMARY KEY,
   admin_id INT NOT NULL,
   name VARCHAR(150) NOT NULL,
   location VARCHAR(200) NOT NULL,
   description TEXT NOT NULL,
+  cover_image VARCHAR(255) NULL,
+  average_rating DECIMAL(2, 1) NOT NULL DEFAULT 5.0,
+  total_reviews INT NOT NULL DEFAULT 0,
   contact_email VARCHAR(150) NULL,
   contact_phone VARCHAR(20) NULL,
   website VARCHAR(255) NULL,
@@ -90,19 +87,7 @@ CREATE TABLE sanctuaries (
     REFERENCES users(user_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. SANCTUARY_IMAGES: gallery and cover photos (CASCADE DELETE PERMITTED)
-CREATE TABLE sanctuary_images (
-  image_id INT AUTO_INCREMENT PRIMARY KEY,
-  sanctuary_id INT NOT NULL,
-  image_path VARCHAR(255) NOT NULL,
-  is_cover BOOLEAN NOT NULL DEFAULT FALSE,
-  sort_order INT NOT NULL DEFAULT 0,
-  uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_sanctuary_images_sanctuary FOREIGN KEY (sanctuary_id) 
-    REFERENCES sanctuaries(sanctuary_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 6. ACTIVITIES: safaris, boat tours, birding expeditions offered by sanctuaries
+-- 4. ACTIVITIES: safaris, boat tours, birding expeditions offered by sanctuaries
 CREATE TABLE activities (
   activity_id INT AUTO_INCREMENT PRIMARY KEY,
   sanctuary_id INT NOT NULL,
@@ -118,7 +103,7 @@ CREATE TABLE activities (
     REFERENCES sanctuaries(sanctuary_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 7. GUIDES: naturalist guides employed at a specific sanctuary
+-- 5. GUIDES: naturalist guides employed at a specific sanctuary
 CREATE TABLE guides (
   guide_id INT AUTO_INCREMENT PRIMARY KEY,
   sanctuary_id INT NOT NULL,
@@ -130,7 +115,7 @@ CREATE TABLE guides (
     REFERENCES sanctuaries(sanctuary_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 8. VEHICLES: safari jeeps, canters, and boats belonging to a sanctuary
+-- 6. VEHICLES: safari jeeps, canters, and boats belonging to a sanctuary
 CREATE TABLE vehicles (
   vehicle_id INT AUTO_INCREMENT PRIMARY KEY,
   sanctuary_id INT NOT NULL,
@@ -141,7 +126,7 @@ CREATE TABLE vehicles (
     REFERENCES sanctuaries(sanctuary_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 9. SLOTS: specific scheduled sessions for an activity, guide, and vehicle
+-- 7. SLOTS: specific scheduled departure sessions linking activity, guide, and vehicle
 CREATE TABLE slots (
   slot_id INT AUTO_INCREMENT PRIMARY KEY,
   activity_id INT NOT NULL,
@@ -162,7 +147,7 @@ CREATE TABLE slots (
     REFERENCES vehicles(vehicle_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 10. BOOKINGS: customer reservations linking users and slots
+-- 8. BOOKINGS: customer reservations + cancellation fields consolidated
 CREATE TABLE bookings (
   booking_id INT AUTO_INCREMENT PRIMARY KEY,
   booking_code VARCHAR(20) NOT NULL UNIQUE,
@@ -173,6 +158,11 @@ CREATE TABLE bookings (
   total_amount DECIMAL(10, 2) NOT NULL,
   hold_expires_at DATETIME NULL,
   booked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- Integrated cancellation tracking columns (eliminates cancellations table)
+  cancelled_at DATETIME NULL,
+  cancellation_reason TEXT NULL,
+  cancellation_fee DECIMAL(10, 2) NULL DEFAULT 0.00,
+  refund_amount DECIMAL(10, 2) NULL DEFAULT 0.00,
   CONSTRAINT chk_booking_people CHECK (number_of_people > 0),
   CONSTRAINT chk_booking_amount CHECK (total_amount >= 0),
   CONSTRAINT fk_bookings_user FOREIGN KEY (user_id) 
@@ -181,20 +171,7 @@ CREATE TABLE bookings (
     REFERENCES slots(slot_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 11. BOOKING_ATTENDEES: individual passenger details (CASCADE DELETE PERMITTED)
-CREATE TABLE booking_attendees (
-  attendee_id INT AUTO_INCREMENT PRIMARY KEY,
-  booking_id INT NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  age INT NOT NULL,
-  id_type VARCHAR(50) NOT NULL,
-  id_number VARCHAR(100) NOT NULL,
-  CONSTRAINT chk_attendee_age CHECK (age > 0),
-  CONSTRAINT fk_booking_attendees_booking FOREIGN KEY (booking_id) 
-    REFERENCES bookings(booking_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 12. PAYMENTS: 1:1 payment record per booking
+-- 9. PAYMENTS: 1:1 financial ledger record per booking
 CREATE TABLE payments (
   payment_id INT AUTO_INCREMENT PRIMARY KEY,
   booking_id INT NOT NULL UNIQUE,
@@ -207,40 +184,8 @@ CREATE TABLE payments (
     REFERENCES bookings(booking_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 13. CANCELLATIONS: cancellation fee breakdown for confirmed bookings
-CREATE TABLE cancellations (
-  cancellation_id INT AUTO_INCREMENT PRIMARY KEY,
-  booking_id INT NOT NULL UNIQUE,
-  cancelled_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  amount_paid DECIMAL(10, 2) NOT NULL,
-  fee_percent DECIMAL(5, 2) NOT NULL DEFAULT 40.00,
-  fee_amount DECIMAL(10, 2) NOT NULL,
-  refund_amount DECIMAL(10, 2) NOT NULL,
-  CONSTRAINT chk_cancel_amounts CHECK (amount_paid >= 0 AND fee_amount >= 0 AND refund_amount >= 0),
-  CONSTRAINT fk_cancellations_booking FOREIGN KEY (booking_id) 
-    REFERENCES bookings(booking_id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 14. REVIEWS: visitor ratings for completed visits
-CREATE TABLE reviews (
-  review_id INT AUTO_INCREMENT PRIMARY KEY,
-  booking_id INT NOT NULL UNIQUE,
-  user_id INT NOT NULL,
-  sanctuary_id INT NOT NULL,
-  rating INT NOT NULL,
-  comment TEXT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT chk_review_rating CHECK (rating BETWEEN 1 AND 5),
-  CONSTRAINT fk_reviews_booking FOREIGN KEY (booking_id) 
-    REFERENCES bookings(booking_id) ON DELETE RESTRICT,
-  CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) 
-    REFERENCES users(user_id) ON DELETE RESTRICT,
-  CONSTRAINT fk_reviews_sanctuary FOREIGN KEY (sanctuary_id) 
-    REFERENCES sanctuaries(sanctuary_id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- ==============================================================================
--- INDEXES FOR PERFORMANCE (Per project.md Section 5 / Phase 1)
+-- INDEXES FOR PERFORMANCE
 -- ==============================================================================
 
 CREATE INDEX idx_slots_slot_date ON slots(slot_date);

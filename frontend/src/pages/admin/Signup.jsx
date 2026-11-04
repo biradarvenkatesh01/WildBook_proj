@@ -5,6 +5,90 @@ import client from '../../api/client';
 import Logo from '../../components/Logo';
 import { LightningIcon } from '../../components/Icons';
 
+
+const DEMO_OPERATORS = [
+  {
+    name: 'Tsering Namgyal',
+    organisation_name: 'Hemis High Altitude National Park Trust',
+    designation: 'Chief Wildlife Warden',
+    emailPrefix: 'warden.hemis',
+    phone: '9419154321',
+    licensePrefix: 'LA-HNP-2026',
+    registered_address: 'Leh Wildlife Division, Near Polo Ground, Leh, Ladakh 194101',
+    website: 'https://ladakhwildlife.nic.in',
+  },
+  {
+    name: 'Raghvendra Pratap Singh',
+    organisation_name: 'Dudhwa Terai Conservation Foundation',
+    designation: 'Field Director',
+    emailPrefix: 'director.dudhwa',
+    phone: '9450012345',
+    licensePrefix: 'UP-DTR-2026',
+    registered_address: 'Forest Rest House Compound, Palia Kalan, Lakhimpur Kheri, Uttar Pradesh 262902',
+    website: 'https://dudhwatigerreserve.com',
+  },
+  {
+    name: 'Dr. Geetha Parameswaran',
+    organisation_name: 'Silent Valley Rainforest Sanctuary Trust',
+    designation: 'Ecological Research Officer',
+    emailPrefix: 'warden.silentvalley',
+    phone: '9447234567',
+    licensePrefix: 'KL-SVN-2026',
+    registered_address: 'Wildlife Warden Office, Mukkali PO, Mannarkkad, Palakkad, Kerala 678582',
+    website: 'https://silentvalley.gov.in',
+  },
+  {
+    name: 'Kavitha Manjunath',
+    organisation_name: 'Bhadra Bio-Resilience Society',
+    designation: 'Deputy Conservator of Forests',
+    emailPrefix: 'dcf.bhadra',
+    phone: '9448298765',
+    licensePrefix: 'KA-BTR-2026',
+    registered_address: 'Bhadra Tiger Reserve Complex, Kuvempu Nagar, Chikkamagaluru, Karnataka 577101',
+    website: 'https://bhadratigerreserve.karnataka.gov.in',
+  },
+  {
+    name: 'Bikash Chandra Mohanty',
+    organisation_name: 'Similipal Biosphere Reserve Foundation',
+    designation: 'Regional Chief Conservator',
+    emailPrefix: 'fielddir.similipal',
+    phone: '9437056789',
+    licensePrefix: 'OD-STR-2026',
+    registered_address: 'Baripada Forest Circle, Mayurbhanj District, Odisha 757002',
+    website: 'https://similipal.org',
+  },
+  {
+    name: 'Fateh Singh Bhati',
+    organisation_name: 'Thar Desert Wildlife Protection Trust',
+    designation: 'Desert Ecosystem Warden',
+    emailPrefix: 'warden.desert',
+    phone: '9414167890',
+    licensePrefix: 'RJ-DNP-2026',
+    registered_address: 'Sam Dunes Road, DNP Office, Jaisalmer, Rajasthan 345001',
+    website: 'https://desertnationalpark.rajasthan.gov.in',
+  },
+  {
+    name: 'Pemba Lepcha',
+    organisation_name: 'Khangchendzonga Alpine Reserve Society',
+    designation: 'Alpine Sanctuary Director',
+    emailPrefix: 'director.khangchendzonga',
+    phone: '9434076543',
+    licensePrefix: 'SK-KNP-2026',
+    registered_address: 'Forest Secretariat Complex, Deorali, Gangtok, Sikkim 737102',
+    website: 'https://sikkimforest.gov.in',
+  },
+  {
+    name: 'Dr. S. Karthikeyan',
+    organisation_name: 'Anamalai Hills Conservation Foundation',
+    designation: 'Chief Naturalist & Deputy Director',
+    emailPrefix: 'director.anamalai',
+    phone: '9443187654',
+    licensePrefix: 'TN-ATR-2026',
+    registered_address: 'Topslip Forest Complex, Pollachi, Coimbatore District, Tamil Nadu 642001',
+    website: 'https://anamalaitigerreserve.org',
+  },
+];
+
 export default function AdminSignup() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -33,6 +117,57 @@ export default function AdminSignup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [operatorIdx, setOperatorIdx] = useState(() => {
+    const saved = localStorage.getItem('wb_demo_admin_signup_idx');
+    return saved !== null ? parseInt(saved, 10) % DEMO_OPERATORS.length : 0;
+  });
+
+  const handleAutoFillDemo = () => {
+    const op = DEMO_OPERATORS[operatorIdx];
+    const rand = Math.floor(100 + Math.random() * 900);
+    const nextIdx = (operatorIdx + 1) % DEMO_OPERATORS.length;
+
+    setFormData({
+      name: op.name,
+      organisation_name: op.organisation_name,
+      designation: op.designation,
+      email: `${op.emailPrefix}${rand}@wildbook.com`,
+      phone: op.phone,
+      license_number: `${op.licensePrefix}-${rand}`,
+      registered_address: op.registered_address,
+      website: op.website,
+      password: 'AdminSecret@123',
+      confirmPassword: 'AdminSecret@123',
+      agreeTerms: true,
+    });
+
+    const dummyLicense = new File(
+      [`%PDF-1.4 Operating License for ${op.organisation_name} - Ref: ${op.licensePrefix}-${rand}`],
+      `${op.emailPrefix}_license.pdf`,
+      { type: 'application/pdf' }
+    );
+    const dummyIdentity = new File(
+      [`%PDF-1.4 Government Identity Proof of ${op.name}`],
+      `${op.emailPrefix}_identity.pdf`,
+      { type: 'application/pdf' }
+    );
+    const dummyAuth = new File(
+      [`%PDF-1.4 Official Forest Department Authorization Letter for ${op.designation} ${op.name}`],
+      `${op.emailPrefix}_authorization.pdf`,
+      { type: 'application/pdf' }
+    );
+
+    setFiles({
+      license: dummyLicense,
+      identity: dummyIdentity,
+      authorization: dummyAuth,
+    });
+
+    setOperatorIdx(nextIdx);
+    localStorage.setItem('wb_demo_admin_signup_idx', nextIdx.toString());
+    setError('');
+  };
+
 
   // Password strength calculation
   const getPasswordStrength = (pwd) => {
@@ -129,6 +264,9 @@ export default function AdminSignup() {
       data.append('authorization', files.authorization);
 
       const res = await client.upload('/auth/admin/signup', data);
+      // Advance demo index for next registration
+      const currentIdx = parseInt(localStorage.getItem('wb_demo_admin_signup_idx') || '0', 10);
+      localStorage.setItem('wb_demo_admin_signup_idx', ((currentIdx + 1) % DEMO_OPERATORS.length).toString());
       login(res.user, res.token);
       navigate('/admin/pending', { replace: true });
     } catch (err) {
@@ -230,52 +368,34 @@ export default function AdminSignup() {
             </div>
           )}
 
-          {/* Demo Helper Card */}
-          <div className="mb-4 p-3.5 rounded-2xl bg-[#F6F1E7]/90 border border-[#D5C9B5] text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
-              <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#D9A441] animate-pulse" />
-                <span>Demo Operator Registration</span>
+          {/* Demo Helper Card - Rotating Operators */}
+          <div className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-[#F6F1E7] via-amber-50 to-[#F6F1E7] border-2 border-[#D9A441]/60 text-xs shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+              <div>
+                <div className="flex items-center gap-2 font-semibold text-[#1F3D2B]">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#D9A441] animate-pulse" />
+                  <span className="text-sm font-serif font-bold">Auto-fill Demo Operator</span>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#D9A441] text-[#1F3D2B]">
+                    {operatorIdx + 1} of {DEMO_OPERATORS.length}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-700 mt-1 font-medium">
+                  Candidate: <strong className="text-[#1F3D2B] text-sm">{DEMO_OPERATORS[operatorIdx].name}</strong> ({DEMO_OPERATORS[operatorIdx].organisation_name})
+                </p>
               </div>
+
               <button
                 type="button"
-                onClick={() => {
-                  const rand = Math.floor(100 + Math.random() * 900);
-                  setFormData({
-                    name: 'Dr. Rajesh Kumar',
-                    organisation_name: 'Kabini Wildlife Reserve',
-                    designation: 'Field Director',
-                    email: `director.kabini${rand}@wildbook.com`,
-                    phone: '9876501234',
-                    license_number: `KA-WLD-2026-${rand}`,
-                    registered_address: 'Range Forest Office, Kabini Gate, H.D. Kote Taluk, Karnataka 571114',
-                    website: 'https://kabini-reserve.gov.in',
-                    password: 'AdminSecret@123',
-                    confirmPassword: 'AdminSecret@123',
-                    agreeTerms: true,
-                  });
-
-                  // Generate 3 sample dummy PDF documents for seamless upload testing
-                  const dummyLicense = new File(['%PDF-1.4 demo operating license verification document'], 'demo_operator_license.pdf', { type: 'application/pdf' });
-                  const dummyIdentity = new File(['%PDF-1.4 demo government identity proof document'], 'demo_identity_proof.pdf', { type: 'application/pdf' });
-                  const dummyAuth = new File(['%PDF-1.4 demo forest department authorization letter'], 'demo_authorization_letter.pdf', { type: 'application/pdf' });
-
-                  setFiles({
-                    license: dummyLicense,
-                    identity: dummyIdentity,
-                    authorization: dummyAuth,
-                  });
-
-                  setError('');
-                }}
-                className="px-3 py-1.5 rounded-lg bg-[#1F3D2B] text-white hover:bg-[#162B1D] font-medium text-[11px] transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                onClick={handleAutoFillDemo}
+                className="px-4 py-2.5 rounded-xl bg-[#1F3D2B] text-[#F6F1E7] hover:bg-[#162B1D] font-semibold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
+                title="Click to cycle and auto-fill next operator"
               >
-                <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
-                <span>Auto-fill All Details & Documents</span>
+                <LightningIcon className="w-4 h-4 text-[#D9A441]" />
+                <span>Auto-fill: {DEMO_OPERATORS[operatorIdx].name}</span>
               </button>
             </div>
-            <p className="text-[11px] text-[#666]">
-              Populates complete operator profile and attaches sample PDF proofs for instant demo submission.
+            <p className="text-[11px] text-gray-600 border-t border-[#D5C9B5]/50 pt-2 mt-1">
+              ⚡ <strong>Clicking auto-fill rotates to the next reserve operator</strong> (Next: {DEMO_OPERATORS[(operatorIdx + 1) % DEMO_OPERATORS.length].name} &mdash; {DEMO_OPERATORS[(operatorIdx + 1) % DEMO_OPERATORS.length].organisation_name}). Automatically attaches PDF license proofs and credentials.
             </p>
           </div>
 

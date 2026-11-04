@@ -32,6 +32,7 @@ router.post('/sanctuaries', adminSanctuaryController.createSanctuary);
 router.get('/sanctuaries/:id', adminSanctuaryController.getSanctuaryById);
 router.put('/sanctuaries/:id', adminSanctuaryController.updateSanctuary);
 router.post('/sanctuaries/:id/submit', adminSanctuaryController.submitSanctuary);
+router.post('/sanctuaries/:id/auto-prerequisites', adminSanctuaryController.autoPrerequisites);
 
 // ── Images Management (Multer, cover star, sort order, deletion) ──────────────
 router.post(

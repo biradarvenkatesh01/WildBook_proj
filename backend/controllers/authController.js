@@ -379,10 +379,14 @@ async function adminSignup(req, res, next) {
 
     const newAdminId = userRes.insertId;
 
-    // 2. Insert admin profile
+    const licenseDoc = files?.license?.[0] ? path.join('uploads', 'admin-docs', files.license[0].filename).replace(/\\/g, '/') : null;
+    const identityDoc = files?.identity?.[0] ? path.join('uploads', 'admin-docs', files.identity[0].filename).replace(/\\/g, '/') : null;
+    const authLetterDoc = files?.authorization?.[0] ? path.join('uploads', 'admin-docs', files.authorization[0].filename).replace(/\\/g, '/') : null;
+
+    // 2. Insert admin profile with document columns
     await conn.query(
-      `INSERT INTO admin_profiles (user_id, organisation_name, license_number, designation, registered_address, website)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO admin_profiles (user_id, organisation_name, license_number, designation, registered_address, website, license_doc, identity_doc, auth_letter_doc)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         newAdminId,
         organisation_name.trim(),
@@ -390,25 +394,52 @@ async function adminSignup(req, res, next) {
         designation.trim(),
         registered_address.trim(),
         website ? website.trim() : null,
+        licenseDoc,
+        identityDoc,
+        authLetterDoc,
       ]
     );
 
-    // 3. Insert the 3 uploaded documents
-    const docEntries = [
-      { type: 'LICENSE', file: files.license[0] },
-      { type: 'IDENTITY', file: files.identity[0] },
-      { type: 'AUTHORIZATION', file: files.authorization[0] },
-    ];
+    // 3. Provision initial sanctuary for operator registration
+    const [sancRes] = await conn.query(
+      `INSERT INTO sanctuaries (
+        admin_id, name, location, description, cover_image, average_rating, total_reviews, contact_email, contact_phone, 
+        website, opening_time, closing_time, operating_days, best_time_to_visit, 
+        listing_status
+      ) VALUES (?, ?, ?, ?, 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=80', 5.0, 1, ?, ?, ?, '06:00:00', '18:00:00', 'Monday to Sunday', 'October to May', 'PENDING')`,
+      [
+        newAdminId,
+        organisation_name.trim(),
+        registered_address.trim(),
+        `Official wildlife sanctuary and protected natural habitat managed by ${organisation_name.trim()}.`,
+        email.toLowerCase().trim(),
+        cleanPhone,
+        website ? website.trim() : null,
+      ]
+    );
 
-    for (const doc of docEntries) {
-      // Relative path stored in DB
-      const relativePath = path.join('uploads', 'admin-docs', doc.file.filename).replace(/\\/g, '/');
-      await conn.query(
-        `INSERT INTO admin_documents (admin_id, doc_type, file_path)
-         VALUES (?, ?, ?)`,
-        [newAdminId, doc.type, relativePath]
-      );
-    }
+    const newSanctuaryId = sancRes.insertId;
+
+    // Attach sample safari activity
+    const [actRes] = await conn.query(
+      `INSERT INTO activities (sanctuary_id, activity_name, description, duration_minutes, what_to_carry, price, is_active)
+       VALUES (?, 'Wilderness 4x4 Jeep Safari Experience', 'Guided exploratory safari through core wildlife corridors and natural habitats.', 180, 'Govt Photo ID, camera, neutral clothing', 1800.00, TRUE)`,
+      [newSanctuaryId]
+    );
+
+    // Guide
+    const [guideRes] = await conn.query(
+      `INSERT INTO guides (sanctuary_id, name, phone, experience)
+       VALUES (?, 'Senior Forest Guide', '9876543210', 8)`,
+      [newSanctuaryId]
+    );
+
+    // Vehicle
+    const [vehRes] = await conn.query(
+      `INSERT INTO vehicles (sanctuary_id, vehicle_type, capacity)
+       VALUES (?, 'Open 4x4 Safari Gypsy', 6)`,
+      [newSanctuaryId]
+    );
 
     await conn.commit();
 
@@ -436,7 +467,7 @@ async function adminSignup(req, res, next) {
     if (req.files) {
       Object.values(req.files).forEach((fileArr) => {
         fileArr.forEach((file) => {
-          fs.unlink(file.path, () => {});
+          fs.unlink(file.path, () => { });
         });
       });
     }

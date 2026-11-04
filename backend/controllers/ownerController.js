@@ -111,7 +111,7 @@ async function getAdmins(req, res, next) {
         ap.designation,
         ap.registered_address,
         ap.website,
-        (SELECT COUNT(*) FROM admin_documents ad WHERE ad.admin_id = u.user_id) AS document_count
+        ((ap.license_doc IS NOT NULL) + (ap.identity_doc IS NOT NULL) + (ap.auth_letter_doc IS NOT NULL)) AS document_count
        FROM users u
        LEFT JOIN admin_profiles ap ON u.user_id = ap.user_id
        ${whereSql}
@@ -161,7 +161,10 @@ async function getAdminById(req, res, next) {
         ap.license_number,
         ap.designation,
         ap.registered_address,
-        ap.website
+        ap.website,
+        ap.license_doc,
+        ap.identity_doc,
+        ap.auth_letter_doc
        FROM users u
        LEFT JOIN admin_profiles ap ON u.user_id = ap.user_id
        LEFT JOIN users reviewer ON u.reviewed_by = reviewer.user_id
@@ -175,17 +178,15 @@ async function getAdminById(req, res, next) {
 
     const admin = users[0];
 
-    // Fetch documents
-    const [documents] = await pool.query(
-      `SELECT document_id, admin_id, doc_type, file_path, uploaded_at
-       FROM admin_documents
-       WHERE admin_id = ?
-       ORDER BY document_id ASC`,
-      [adminId]
-    );
+    // Fetch documents from admin_profiles
+    const docItems = [
+      { docId: 1, doc_type: 'LICENSE_PROOF', file_path: admin.license_doc },
+      { docId: 2, doc_type: 'IDENTITY_PROOF', file_path: admin.identity_doc },
+      { docId: 3, doc_type: 'AUTHORIZATION_LETTER', file_path: admin.auth_letter_doc },
+    ].filter(d => d.file_path);
 
     // Compute document file sizes
-    const docsWithMeta = documents.map((doc) => {
+    const docsWithMeta = docItems.map((doc) => {
       let sizeBytes = 0;
       let filename = path.basename(doc.file_path);
       try {
@@ -197,7 +198,11 @@ async function getAdminById(req, res, next) {
         sizeBytes = 0;
       }
       return {
-        ...doc,
+        document_id: doc.docId,
+        admin_id: adminId,
+        doc_type: doc.doc_type,
+        file_path: doc.file_path,
+        uploaded_at: admin.created_at,
         filename,
         sizeBytes,
         sizeFormatted: formatBytes(sizeBytes),
@@ -226,19 +231,27 @@ async function streamDocument(req, res, next) {
       return res.status(400).json({ error: 'Invalid parameters' });
     }
 
-    const [docs] = await pool.query(
-      `SELECT document_id, admin_id, doc_type, file_path
-       FROM admin_documents
-       WHERE document_id = ? AND admin_id = ?`,
-      [docId, adminId]
+    const [[prof]] = await pool.query(
+      `SELECT license_doc, identity_doc, auth_letter_doc
+       FROM admin_profiles
+       WHERE user_id = ?`,
+      [adminId]
     );
 
-    if (docs.length === 0) {
+    if (!prof) {
+      return res.status(404).json({ error: 'Admin profile not found' });
+    }
+
+    let filePath = null;
+    if (docId === 1) filePath = prof.license_doc;
+    else if (docId === 2) filePath = prof.identity_doc;
+    else if (docId === 3) filePath = prof.auth_letter_doc;
+
+    if (!filePath) {
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    const doc = docs[0];
-    const fullPath = path.resolve(__dirname, '..', doc.file_path);
+    const fullPath = path.resolve(__dirname, '..', filePath);
 
     if (!fs.existsSync(fullPath)) {
       return res.status(404).json({ error: 'Document file missing on server' });
@@ -308,6 +321,47 @@ async function updateAdminStatus(req, res, next) {
        WHERE user_id = ?`,
       [decision, reviewerId, note ? note.trim() : null, adminId]
     );
+
+    // When approving an operator account, automatically approve any pending sanctuary belonging to them and provision demo slots
+    if (decision === 'APPROVED') {
+      const [pendingSancs] = await pool.query(
+        'SELECT sanctuary_id FROM sanctuaries WHERE admin_id = ? AND listing_status = "PENDING"',
+        [adminId]
+      );
+
+      for (const s of pendingSancs) {
+        const [actRows] = await pool.query(
+          'SELECT activity_id FROM activities WHERE sanctuary_id = ? AND is_active = TRUE LIMIT 1',
+          [s.sanctuary_id]
+        );
+        const [guideRows] = await pool.query(
+          'SELECT guide_id FROM guides WHERE sanctuary_id = ? LIMIT 1',
+          [s.sanctuary_id]
+        );
+        const [vehRows] = await pool.query(
+          'SELECT vehicle_id FROM vehicles WHERE sanctuary_id = ? LIMIT 1',
+          [s.sanctuary_id]
+        );
+
+        if (actRows.length > 0 && guideRows.length > 0 && vehRows.length > 0) {
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + 5);
+          const slotDateStr = futureDate.toISOString().slice(0, 10);
+          await pool.query(
+            `INSERT INTO slots (activity_id, guide_id, vehicle_id, slot_date, slot_time, capacity, is_active)
+             VALUES (?, ?, ?, ?, '06:30:00', 6, TRUE)`,
+            [actRows[0].activity_id, guideRows[0].guide_id, vehRows[0].vehicle_id, slotDateStr]
+          );
+        }
+      }
+
+      await pool.query(
+        `UPDATE sanctuaries 
+         SET listing_status = 'APPROVED', reviewed_by = ?, reviewed_at = NOW(), review_note = ?
+         WHERE admin_id = ? AND listing_status = 'PENDING'`,
+        [reviewerId, note ? note.trim() : 'Operator application approved', adminId]
+      );
+    }
 
     return res.status(200).json({
       message: `Admin account has been ${decision.toLowerCase()}.`,

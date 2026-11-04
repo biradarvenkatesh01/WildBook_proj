@@ -20,13 +20,7 @@ async function getActivitySlots(req, res, next) {
         s.sanctuary_id,
         s.name AS sanctuary_name,
         s.location AS sanctuary_location,
-        (
-          SELECT si.image_path 
-          FROM sanctuary_images si 
-          WHERE si.sanctuary_id = s.sanctuary_id 
-          ORDER BY si.is_cover DESC, si.sort_order ASC, si.image_id ASC 
-          LIMIT 1
-        ) AS cover_image
+        s.cover_image
        FROM activities a
        JOIN sanctuaries s ON a.sanctuary_id = s.sanctuary_id
        WHERE a.activity_id = ? 

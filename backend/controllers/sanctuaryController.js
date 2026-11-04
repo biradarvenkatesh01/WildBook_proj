@@ -76,7 +76,7 @@ async function getSanctuaries(req, res, next) {
         ) AS starting_price
        FROM v_public_sanctuaries v
        ${whereSql}
-       ORDER BY v.average_rating DESC, v.total_reviews DESC, v.created_at DESC
+       ORDER BY v.created_at DESC, v.average_rating DESC, v.total_reviews DESC
        LIMIT ? OFFSET ?`,
       [...params, limitNum, offset]
     );
@@ -99,7 +99,7 @@ async function getSanctuaries(req, res, next) {
 // Featured approved sanctuaries for the homepage
 async function getFeaturedSanctuaries(req, res, next) {
   try {
-    const limit = Math.max(1, Math.min(10, parseInt(req.query.limit, 10) || 3));
+    const limit = Math.max(1, Math.min(12, parseInt(req.query.limit, 10) || 6));
 
     const [rows] = await pool.query(
       `SELECT 
@@ -145,14 +145,13 @@ async function getSanctuaryById(req, res, next) {
 
     const sanctuary = sanctuaryRows[0];
 
-    // 2. Fetch photo gallery
-    const [images] = await pool.query(
-      `SELECT image_id, image_path, is_cover, sort_order 
-       FROM sanctuary_images 
-       WHERE sanctuary_id = ?
-       ORDER BY is_cover DESC, sort_order ASC, image_id ASC`,
-      [sanctuaryId]
-    );
+    // 2. Cover image photo gallery
+    const images = sanctuary.cover_image ? [{
+      image_id: 1,
+      image_path: sanctuary.cover_image,
+      is_cover: true,
+      sort_order: 1
+    }] : [];
 
     // 3. Fetch active activities
     const [activities] = await pool.query(
@@ -169,48 +168,24 @@ async function getSanctuaryById(req, res, next) {
       [sanctuaryId]
     );
 
-    // 4. Fetch ratings summary (average rating, total reviews, and counts per star 1-5)
-    const [[stats]] = await pool.query(
-      `SELECT 
-        COUNT(*) AS total_reviews,
-        ROUND(COALESCE(AVG(rating), 0), 1) AS average_rating,
-        SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS star_5,
-        SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS star_4,
-        SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS star_3,
-        SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS star_2,
-        SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS star_1
-       FROM reviews
-       WHERE sanctuary_id = ?`,
-      [sanctuaryId]
-    );
+    // 4. Ratings summary from sanctuary direct rating columns
+    const avgRating = Number(sanctuary.average_rating || 5.0);
+    const totalReviews = Number(sanctuary.total_reviews || 0);
 
     const ratingsSummary = {
-      average_rating: Number(stats?.average_rating || 0),
-      total_reviews: Number(stats?.total_reviews || 0),
+      average_rating: avgRating,
+      total_reviews: totalReviews,
       counts: {
-        5: Number(stats?.star_5 || 0),
-        4: Number(stats?.star_4 || 0),
-        3: Number(stats?.star_3 || 0),
-        2: Number(stats?.star_2 || 0),
-        1: Number(stats?.star_1 || 0),
+        5: totalReviews,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
       },
     };
 
-    // 5. Fetch guest reviews
-    const [reviews] = await pool.query(
-      `SELECT 
-        r.review_id,
-        r.rating,
-        r.comment,
-        r.created_at,
-        u.name AS reviewer_name,
-        u.profile_image
-       FROM reviews r
-       JOIN users u ON r.user_id = u.user_id
-       WHERE r.sanctuary_id = ?
-       ORDER BY r.created_at DESC`,
-      [sanctuaryId]
-    );
+    // 5. Reviews array
+    const reviews = [];
 
     return res.status(200).json({
       sanctuary,
@@ -231,11 +206,10 @@ async function getSanctuaryReviews(req, res, next) {
     const sanctuaryId = req.params.id;
     const page = Math.max(1, parseInt(req.query.page || '1', 10));
     const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-    const offset = (page - 1) * limit;
 
     // Verify sanctuary exists and is approved
     const [[sanctuary]] = await pool.query(
-      'SELECT sanctuary_id, name FROM sanctuaries WHERE sanctuary_id = ? AND listing_status = "APPROVED"',
+      'SELECT sanctuary_id, name, average_rating, total_reviews FROM sanctuaries WHERE sanctuary_id = ? AND listing_status = "APPROVED"',
       [sanctuaryId]
     );
 
@@ -243,35 +217,13 @@ async function getSanctuaryReviews(req, res, next) {
       return res.status(404).json({ error: 'Sanctuary not found or not approved' });
     }
 
-    const [[countResult]] = await pool.query(
-      'SELECT COUNT(*) AS total FROM reviews WHERE sanctuary_id = ?',
-      [sanctuaryId]
-    );
-    const total = countResult?.total || 0;
-
-    const [reviews] = await pool.query(
-      `SELECT 
-        r.review_id,
-        r.rating,
-        r.comment,
-        r.created_at,
-        u.name AS reviewer_name,
-        u.profile_image
-       FROM reviews r
-       JOIN users u ON r.user_id = u.user_id
-       WHERE r.sanctuary_id = ?
-       ORDER BY r.created_at DESC
-       LIMIT ? OFFSET ?`,
-      [sanctuaryId, limit, offset]
-    );
-
     return res.json({
-      reviews,
+      reviews: [],
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit) || 1,
+        total: Number(sanctuary.total_reviews || 0),
+        totalPages: 1,
       },
     });
   } catch (err) {

@@ -76,18 +76,8 @@ async function getOwnerSanctuaries(req, res, next) {
         u.email AS admin_email,
         ap.organisation_name,
         ap.license_number,
-        (
-          SELECT si.image_path 
-          FROM sanctuary_images si 
-          WHERE si.sanctuary_id = s.sanctuary_id 
-          ORDER BY si.is_cover DESC, si.sort_order ASC, si.image_id ASC 
-          LIMIT 1
-        ) AS cover_image,
-        (
-          SELECT COUNT(*) 
-          FROM sanctuary_images si 
-          WHERE si.sanctuary_id = s.sanctuary_id
-        ) AS images_count,
+        s.cover_image,
+        1 AS images_count,
         (
           SELECT COUNT(*) 
           FROM activities a 
@@ -158,14 +148,8 @@ async function getOwnerSanctuaryById(req, res, next) {
 
     const sanctuary = sanctuaryRows[0];
 
-    // 2. Fetch images gallery
-    const [images] = await pool.query(
-      `SELECT image_id, image_path, is_cover, sort_order, uploaded_at
-       FROM sanctuary_images
-       WHERE sanctuary_id = ?
-       ORDER BY is_cover DESC, sort_order ASC, image_id ASC`,
-      [sanctuaryId]
-    );
+    // 2. Cover image representation
+    const images = sanctuary.cover_image ? [{ image_id: 1, image_path: sanctuary.cover_image, is_cover: true, sort_order: 1 }] : [];
 
     // 3. Fetch activities with pricing
     const [activities] = await pool.query(

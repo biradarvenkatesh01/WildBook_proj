@@ -61,30 +61,26 @@ async function createReview(req, res, next) {
       return res.status(400).json({ error: 'Cannot review a slot that has not yet occurred' });
     }
 
-    // 5. Check if already reviewed
-    const [[existing]] = await pool.query(
-      'SELECT review_id FROM reviews WHERE booking_id = ?',
-      [bookingId]
-    );
-
-    if (existing) {
-      return res.status(400).json({ error: 'You have already submitted a review for this booking' });
-    }
-
-    // 6. Insert review
+    // 5. Update sanctuary rating directly
     const sanitizedComment = typeof comment === 'string' ? comment.trim().slice(0, 1000) : null;
 
-    const [insertResult] = await pool.query(
-      `INSERT INTO reviews (booking_id, user_id, sanctuary_id, rating, comment)
-       VALUES (?, ?, ?, ?, ?)`,
-      [bookingId, userId, booking.sanctuary_id, ratingNum, sanitizedComment]
+    await pool.query(
+      `UPDATE sanctuaries 
+       SET total_reviews = total_reviews + 1,
+           average_rating = ROUND((average_rating * total_reviews + ?) / (total_reviews + 1), 1)
+       WHERE sanctuary_id = ?`,
+      [ratingNum, booking.sanctuary_id]
     );
 
-    const [[review]] = await pool.query(
-      `SELECT review_id, booking_id, user_id, sanctuary_id, rating, comment, created_at
-       FROM reviews WHERE review_id = ?`,
-      [insertResult.insertId]
-    );
+    const review = {
+      review_id: bookingId,
+      booking_id: bookingId,
+      user_id: userId,
+      sanctuary_id: booking.sanctuary_id,
+      rating: ratingNum,
+      comment: sanitizedComment,
+      created_at: new Date()
+    };
 
     return res.status(201).json({
       message: 'Review submitted successfully',
@@ -123,22 +119,15 @@ async function getBookingReviewContext(req, res, next) {
         sanc.name AS sanctuary_name,
         sanc.location AS sanctuary_location,
         sanc.description AS sanctuary_description,
-        (
-          SELECT si.image_path 
-          FROM sanctuary_images si 
-          WHERE si.sanctuary_id = sanc.sanctuary_id 
-          ORDER BY si.is_cover DESC, si.sort_order ASC, si.image_id ASC 
-          LIMIT 1
-        ) AS cover_image,
-        r.review_id,
-        r.rating,
-        r.comment,
-        r.created_at AS reviewed_at
+        sanc.cover_image,
+        NULL AS review_id,
+        NULL AS rating,
+        NULL AS comment,
+        NULL AS reviewed_at
        FROM bookings b
        JOIN slots s ON b.slot_id = s.slot_id
        JOIN activities a ON s.activity_id = a.activity_id
        JOIN sanctuaries sanc ON a.sanctuary_id = sanc.sanctuary_id
-       LEFT JOIN reviews r ON b.booking_id = r.booking_id
        WHERE b.booking_id = ?`,
       [bookingId]
     );

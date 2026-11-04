@@ -163,14 +163,13 @@ exports.getOwnerReports = async (req, res, next) => {
          COALESCE(SUM(CASE WHEN b.status = 'CONFIRMED' THEN b.number_of_people ELSE 0 END), 0) AS total_visitors,
          COALESCE(SUM(CASE 
            WHEN b.status = 'CONFIRMED' THEN b.total_amount 
-           WHEN b.status = 'CANCELLED' THEN COALESCE(c.fee_amount, 0) 
+           WHEN b.status = 'CANCELLED' THEN COALESCE(b.cancellation_fee, 0) 
            ELSE 0 
          END), 0) AS total_revenue
        FROM sanctuaries s
        LEFT JOIN activities a ON s.sanctuary_id = a.sanctuary_id
        LEFT JOIN slots sl ON a.activity_id = sl.activity_id
        LEFT JOIN bookings b ON sl.slot_id = b.slot_id AND b.status IN ('CONFIRMED', 'CANCELLED')
-       LEFT JOIN cancellations c ON b.booking_id = c.booking_id
        WHERE s.listing_status = 'APPROVED'
        GROUP BY s.sanctuary_id, s.name, s.location
        ORDER BY total_bookings DESC, total_revenue DESC
@@ -188,12 +187,11 @@ exports.getOwnerReports = async (req, res, next) => {
          COALESCE(SUM(b.number_of_people), 0) AS total_seats,
          COALESCE(SUM(CASE 
            WHEN b.status = 'CONFIRMED' THEN b.total_amount 
-           WHEN b.status = 'CANCELLED' THEN COALESCE(c.fee_amount, 0) 
+           WHEN b.status = 'CANCELLED' THEN COALESCE(b.cancellation_fee, 0) 
            ELSE 0 
          END), 0) AS total_spend
        FROM users u
        JOIN bookings b ON u.user_id = b.user_id
-       LEFT JOIN cancellations c ON b.booking_id = c.booking_id
        WHERE b.status IN ('CONFIRMED', 'CANCELLED')
        GROUP BY u.user_id, u.name, u.email, u.phone
        HAVING COUNT(b.booking_id) >= 1
@@ -209,17 +207,16 @@ exports.getOwnerReports = async (req, res, next) => {
          DATE_FORMAT(b.booked_at, '%Y-%m') AS booking_month,
          COUNT(b.booking_id) AS total_bookings,
          COALESCE(SUM(CASE WHEN b.status = 'CONFIRMED' THEN b.total_amount ELSE 0 END), 0) AS confirmed_revenue,
-         COALESCE(SUM(CASE WHEN b.status = 'CANCELLED' THEN COALESCE(c.fee_amount, 0) ELSE 0 END), 0) AS cancellation_fees_kept,
+         COALESCE(SUM(CASE WHEN b.status = 'CANCELLED' THEN COALESCE(b.cancellation_fee, 0) ELSE 0 END), 0) AS cancellation_fees_kept,
          COALESCE(SUM(CASE 
            WHEN b.status = 'CONFIRMED' THEN b.total_amount 
-           WHEN b.status = 'CANCELLED' THEN COALESCE(c.fee_amount, 0) 
+           WHEN b.status = 'CANCELLED' THEN COALESCE(b.cancellation_fee, 0) 
            ELSE 0 
          END), 0) AS net_revenue
        FROM sanctuaries s
        JOIN activities a ON s.sanctuary_id = a.sanctuary_id
        JOIN slots sl ON a.activity_id = sl.activity_id
        JOIN bookings b ON sl.slot_id = b.slot_id
-       LEFT JOIN cancellations c ON b.booking_id = c.booking_id
        WHERE b.status IN ('CONFIRMED', 'CANCELLED')
        GROUP BY s.sanctuary_id, s.name, DATE_FORMAT(b.booked_at, '%Y-%m')
        ORDER BY booking_month DESC, net_revenue DESC
@@ -265,12 +262,11 @@ exports.getOwnerReports = async (req, res, next) => {
          ROUND(
            (SUM(CASE WHEN b.status = 'CANCELLED' THEN 1 ELSE 0 END) / NULLIF(COUNT(b.booking_id), 0)) * 100, 1
          ) AS cancellation_rate_percent,
-         COALESCE(SUM(c.fee_amount), 0) AS total_cancellation_fees_collected
+         COALESCE(SUM(b.cancellation_fee), 0) AS total_cancellation_fees_collected
        FROM sanctuaries s
        JOIN activities a ON s.sanctuary_id = a.sanctuary_id
        JOIN slots sl ON a.activity_id = sl.activity_id
        JOIN bookings b ON sl.slot_id = b.slot_id
-       LEFT JOIN cancellations c ON b.booking_id = c.booking_id
        WHERE b.status IN ('CONFIRMED', 'CANCELLED')
        GROUP BY s.sanctuary_id, s.name
        ORDER BY cancellation_rate_percent DESC`

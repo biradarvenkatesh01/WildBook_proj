@@ -10,18 +10,13 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE reviews;
-TRUNCATE TABLE cancellations;
 TRUNCATE TABLE payments;
-TRUNCATE TABLE booking_attendees;
 TRUNCATE TABLE bookings;
 TRUNCATE TABLE slots;
 TRUNCATE TABLE vehicles;
 TRUNCATE TABLE guides;
 TRUNCATE TABLE activities;
-TRUNCATE TABLE sanctuary_images;
 TRUNCATE TABLE sanctuaries;
-TRUNCATE TABLE admin_documents;
 TRUNCATE TABLE admin_profiles;
 TRUNCATE TABLE users;
 
@@ -98,7 +93,7 @@ INSERT INTO users (
 -- 2. ADMIN_PROFILES
 -- ------------------------------------------------------------------------------
 INSERT INTO admin_profiles (
-  user_id, organisation_name, license_number, designation, registered_address, website
+  user_id, organisation_name, license_number, designation, registered_address, website, license_doc, identity_doc, auth_letter_doc
 ) VALUES
 (
   2, 
@@ -106,7 +101,7 @@ INSERT INTO admin_profiles (
   'KA-WLD-2024-001', 
   'Chief Conservator & Field Director', 
   'Vanavikas Bhavan, Malleshwaram, Bengaluru, Karnataka - 560003', 
-  'https://aranya.gov.in'
+  'https://aranya.gov.in', 'uploads/admin-docs/admin_2_license.pdf', 'uploads/admin-docs/admin_2_identity.pdf', 'uploads/admin-docs/admin_2_authorization.pdf'
 ),
 (
   3, 
@@ -114,27 +109,14 @@ INSERT INTO admin_profiles (
   'KA-WLD-2024-009', 
   'General Manager - Safari Operations', 
   'Bandipur National Park Campus, Gundlupet Taluk, Chamarajanagar - 571126', 
-  'https://bandipurtigerreserve.in'
+  'https://bandipurtigerreserve.in', 'uploads/admin-docs/admin_3_license.pdf', 'uploads/admin-docs/admin_3_identity.pdf', 'uploads/admin-docs/admin_3_authorization.pdf'
 );
-
--- ------------------------------------------------------------------------------
--- 3. ADMIN_DOCUMENTS
--- ------------------------------------------------------------------------------
-INSERT INTO admin_documents (
-  document_id, admin_id, doc_type, file_path, uploaded_at
-) VALUES
-(1, 2, 'LICENSE', 'uploads/admin-docs/admin_2_license.pdf', '2026-01-05 09:35:00'),
-(2, 2, 'IDENTITY', 'uploads/admin-docs/admin_2_identity.pdf', '2026-01-05 09:36:00'),
-(3, 2, 'AUTHORIZATION', 'uploads/admin-docs/admin_2_authorization.pdf', '2026-01-05 09:37:00'),
-(4, 3, 'LICENSE', 'uploads/admin-docs/admin_3_license.pdf', '2026-10-15 14:05:00'),
-(5, 3, 'IDENTITY', 'uploads/admin-docs/admin_3_identity.pdf', '2026-10-15 14:06:00'),
-(6, 3, 'AUTHORIZATION', 'uploads/admin-docs/admin_3_authorization.pdf', '2026-10-15 14:07:00');
 
 -- ------------------------------------------------------------------------------
 -- 4. SANCTUARIES
 -- ------------------------------------------------------------------------------
 INSERT INTO sanctuaries (
-  sanctuary_id, admin_id, name, location, description, contact_email, contact_phone, website, opening_time, closing_time, operating_days, best_time_to_visit, latitude, longitude, listing_status, review_note, reviewed_by, reviewed_at, created_at
+  sanctuary_id, admin_id, name, location, description, cover_image, average_rating, total_reviews, contact_email, contact_phone, website, opening_time, closing_time, operating_days, best_time_to_visit, latitude, longitude, listing_status, review_note, reviewed_by, reviewed_at, created_at
 ) VALUES
 (
   1, 
@@ -142,6 +124,7 @@ INSERT INTO sanctuaries (
   'Nagarhole National Park (Kabini Reserve)', 
   'Kodagu & Mysuru Districts, Karnataka', 
   'Spread across lush foothills of the Western Ghats, Nagarhole is famed for one of India’s highest predator densities including Bengal tigers, leopards, and massive herds of Asiatic elephants wandering along the tranquil waters of the Kabini River.', 
+  'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1200&q=80', 5.0, 1,
   'nagarhole.safari@wildbook.com', 
   '+91 821 2480901', 
   'https://nagarholetigerreserve.org', 
@@ -163,6 +146,7 @@ INSERT INTO sanctuaries (
   'Bandipur Tiger Reserve & National Park', 
   'Chamarajanagar District, Karnataka', 
   'Part of the Nilgiri Biosphere Reserve, Bandipur connects with Mudumalai and Wayanad to form a critical wildlife corridor protecting tigers, dholes, sloth bears, Indian gaurs, and over 200 species of vibrant birds.', 
+  'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=80', 5.0, 1,
   'bandipur.safari@wildbook.com', 
   '+91 8229 236043', 
   'https://bandipurtigerreserve.in', 
@@ -178,18 +162,6 @@ INSERT INTO sanctuaries (
   '2026-01-15 14:00:00', 
   '2026-01-14 12:00:00'
 );
-
--- ------------------------------------------------------------------------------
--- 5. SANCTUARY_IMAGES
--- ------------------------------------------------------------------------------
-INSERT INTO sanctuary_images (
-  image_id, sanctuary_id, image_path, is_cover, sort_order, uploaded_at
-) VALUES
-(1, 1, '/uploads/sanctuaries/nagarhole-cover.jpg', TRUE, 1, '2026-01-11 10:15:00'),
-(2, 1, '/uploads/sanctuaries/nagarhole-kabini-boat.jpg', FALSE, 2, '2026-01-11 10:16:00'),
-(3, 1, '/uploads/sanctuaries/nagarhole-elephants.jpg', FALSE, 3, '2026-01-11 10:17:00'),
-(4, 2, '/uploads/sanctuaries/bandipur-cover.jpg', TRUE, 1, '2026-01-14 12:15:00'),
-(5, 2, '/uploads/sanctuaries/bandipur-gaur.jpg', FALSE, 2, '2026-01-14 12:16:00');
 
 -- ------------------------------------------------------------------------------
 -- 6. ACTIVITIES
@@ -254,16 +226,11 @@ INSERT INTO slots (
 
 -- Past confirmed booking for visitor 4 on slot 1
 INSERT INTO bookings (
-  booking_id, booking_code, user_id, slot_id, number_of_people, status, total_amount, hold_expires_at, booked_at
+  booking_id, booking_code, user_id, slot_id, number_of_people, status, total_amount, hold_expires_at, booked_at, cancelled_at, cancellation_reason, cancellation_fee, refund_amount
 ) VALUES (
-  1, 'WB-PAST0001', 4, 1, 2, 'CONFIRMED', 3600.00, NULL, '2026-03-01 10:00:00'
+  1, 'WB-PAST0001', 4, 1, 2, 'CONFIRMED', 3600.00, NULL, '2026-03-01 10:00:00', NULL, NULL, 0.00, 0.00
 );
 
-INSERT INTO booking_attendees (
-  attendee_id, booking_id, name, age, id_type, id_number
-) VALUES
-(1, 1, 'Pooja Hegde', 27, 'AADHAAR', 'XXXXXXXX4912'),
-(2, 1, 'Sneha Hegde', 24, 'PASSPORT', 'Z1234567');
 
 INSERT INTO payments (
   payment_id, booking_id, amount, payment_status, transaction_ref, paid_at
@@ -272,24 +239,14 @@ INSERT INTO payments (
 );
 
 -- Legitimate review for the past confirmed booking
-INSERT INTO reviews (
-  review_id, booking_id, user_id, sanctuary_id, rating, comment, created_at
-) VALUES (
-  1, 1, 4, 1, 5, 'Breathtaking experience! We spotted a mother tigress and two cubs near the waterhole. Guide Mahesh was immensely knowledgeable and respectful of forest etiquette.', '2026-03-11 18:30:00'
-);
 
 -- Future confirmed booking on slot 2 (2 seats taken out of 6)
 INSERT INTO bookings (
-  booking_id, booking_code, user_id, slot_id, number_of_people, status, total_amount, hold_expires_at, booked_at
+  booking_id, booking_code, user_id, slot_id, number_of_people, status, total_amount, hold_expires_at, booked_at, cancelled_at, cancellation_reason, cancellation_fee, refund_amount
 ) VALUES (
-  2, 'WB-FUT00002', 4, 2, 2, 'CONFIRMED', 3600.00, NULL, NOW()
+  2, 'WB-FUT00002', 4, 2, 2, 'CONFIRMED', 3600.00, NULL, NOW(), NULL, NULL, 0.00, 0.00
 );
 
-INSERT INTO booking_attendees (
-  attendee_id, booking_id, name, age, id_type, id_number
-) VALUES
-(3, 2, 'Pooja Hegde', 27, 'AADHAAR', 'XXXXXXXX4912'),
-(4, 2, 'Rohan Hegde', 31, 'DRIVING_LICENSE', 'KA0420180091');
 
 INSERT INTO payments (
   payment_id, booking_id, amount, payment_status, transaction_ref, paid_at

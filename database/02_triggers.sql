@@ -1,6 +1,5 @@
 -- ==============================================================================
--- WildBook: 02_triggers.sql
--- Database Triggers for Cross-Table Integrity & Business Rules
+-- WildBook: 02_triggers.sql (Optimized 9-Table Triggers)
 -- ==============================================================================
 
 DELIMITER $$
@@ -118,45 +117,6 @@ BEGIN
   ELSEIF v_admin_status <> 'APPROVED' THEN
     SIGNAL SQLSTATE '45000'
       SET MESSAGE_TEXT = 'Only an APPROVED admin can add slots';
-  END IF;
-END$$
-
--- ------------------------------------------------------------------------------
--- 4. TRIGGER: A review needs a past CONFIRMED booking of the same user
--- ------------------------------------------------------------------------------
-DROP TRIGGER IF EXISTS trg_review_past_confirmed_booking$$
-CREATE TRIGGER trg_review_past_confirmed_booking
-BEFORE INSERT ON reviews
-FOR EACH ROW
-BEGIN
-  DECLARE v_booking_user INT;
-  DECLARE v_booking_status VARCHAR(20);
-  DECLARE v_slot_date DATE;
-  DECLARE v_slot_time TIME;
-  DECLARE v_sanctuary_id INT;
-
-  SELECT b.user_id, b.status, s.slot_date, s.slot_time, a.sanctuary_id
-  INTO v_booking_user, v_booking_status, v_slot_date, v_slot_time, v_sanctuary_id
-  FROM bookings b
-  JOIN slots s ON b.slot_id = s.slot_id
-  JOIN activities a ON s.activity_id = a.activity_id
-  WHERE b.booking_id = NEW.booking_id;
-
-  IF v_booking_user IS NULL THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Booking not found for this review';
-  ELSEIF v_booking_user <> NEW.user_id THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Reviewer must be the user who made the booking';
-  ELSEIF v_booking_status <> 'CONFIRMED' THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'A review requires a past CONFIRMED booking';
-  ELSEIF v_sanctuary_id <> NEW.sanctuary_id THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Review sanctuary does not match the booked sanctuary';
-  ELSEIF TIMESTAMP(v_slot_date, v_slot_time) > NOW() THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Cannot review a slot that has not yet occurred';
   END IF;
 END$$
 

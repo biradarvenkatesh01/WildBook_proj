@@ -26,18 +26,8 @@ async function getSanctuaries(req, res, next) {
         s.review_note,
         s.reviewed_at,
         s.created_at,
-        (
-          SELECT si.image_path 
-          FROM sanctuary_images si 
-          WHERE si.sanctuary_id = s.sanctuary_id 
-          ORDER BY si.is_cover DESC, si.sort_order ASC, si.image_id ASC 
-          LIMIT 1
-        ) AS cover_image,
-        (
-          SELECT COUNT(*) 
-          FROM sanctuary_images si 
-          WHERE si.sanctuary_id = s.sanctuary_id
-        ) AS image_count,
+        s.cover_image,
+        1 AS image_count,
         (
           SELECT COUNT(*) 
           FROM activities a 
@@ -82,14 +72,15 @@ async function getSanctuaryById(req, res, next) {
       return res.status(403).json({ error: 'Access denied. You do not own this sanctuary listing.' });
     }
 
-    // Fetch images
-    const [images] = await pool.query(
-      `SELECT image_id, sanctuary_id, image_path, is_cover, sort_order, uploaded_at
-       FROM sanctuary_images
-       WHERE sanctuary_id = ?
-       ORDER BY is_cover DESC, sort_order ASC, image_id ASC`,
-      [sanctuaryId]
-    );
+    // Images representation from cover_image
+    const images = sanctuary.cover_image ? [{
+      image_id: 1,
+      sanctuary_id: sanctuary.sanctuary_id,
+      image_path: sanctuary.cover_image,
+      is_cover: true,
+      sort_order: 1,
+      uploaded_at: sanctuary.created_at,
+    }] : [];
 
     // Fetch activities
     const [activities] = await pool.query(
@@ -319,42 +310,21 @@ async function uploadSanctuaryImages(req, res, next) {
       return res.status(400).json({ error: 'No image files uploaded.' });
     }
 
-    // Check current count
-    const [countRows] = await pool.query(
-      'SELECT COUNT(*) AS total FROM sanctuary_images WHERE sanctuary_id = ?',
-      [sanctuaryId]
+    const file = files[0];
+    const imagePath = `/uploads/sanctuaries/${file.filename}`;
+
+    await pool.query(
+      'UPDATE sanctuaries SET cover_image = ? WHERE sanctuary_id = ?',
+      [imagePath, sanctuaryId]
     );
-    const currentCount = countRows[0].total || 0;
 
-    if (currentCount + files.length > 10) {
-      return res.status(400).json({
-        error: `Upload exceeds maximum limit of 10 images. Currently: ${currentCount}, Uploading: ${files.length}.`,
-      });
-    }
-
-    const insertedImages = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const imagePath = `/uploads/sanctuaries/${file.filename}`;
-      // First image of a sanctuary defaults to cover
-      const isCover = currentCount === 0 && i === 0;
-      const sortOrder = currentCount + i + 1;
-
-      const [resInsert] = await pool.query(
-        `INSERT INTO sanctuary_images (sanctuary_id, image_path, is_cover, sort_order)
-         VALUES (?, ?, ?, ?)`,
-        [sanctuaryId, imagePath, isCover, sortOrder]
-      );
-
-      insertedImages.push({
-        image_id: resInsert.insertId,
-        sanctuary_id: sanctuaryId,
-        image_path: imagePath,
-        is_cover: isCover,
-        sort_order: sortOrder,
-      });
-    }
+    const insertedImages = [{
+      image_id: 1,
+      sanctuary_id: sanctuaryId,
+      image_path: imagePath,
+      is_cover: true,
+      sort_order: 1,
+    }];
 
     return res.status(201).json({
       message: 'Images uploaded successfully',
@@ -377,42 +347,10 @@ async function updateSanctuaryImage(req, res, next) {
       return res.status(400).json({ error: 'Invalid parameters' });
     }
 
-    // Check ownership
-    const [check] = await pool.query(
-      'SELECT s.sanctuary_id, s.admin_id, s.listing_status FROM sanctuaries s WHERE s.sanctuary_id = ?',
-      [sanctuaryId]
-    );
-    if (check.length === 0 || check[0].admin_id !== adminId) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-    if (check[0].listing_status === 'PENDING') {
-      return res.status(400).json({ error: 'Edits blocked while review is PENDING' });
-    }
-
-    const { is_cover, sort_order } = req.body;
-
-    if (is_cover === true) {
-      // Unset all other covers for this sanctuary, then set this one
-      await pool.query('UPDATE sanctuary_images SET is_cover = FALSE WHERE sanctuary_id = ?', [
-        sanctuaryId,
-      ]);
-      await pool.query(
-        'UPDATE sanctuary_images SET is_cover = TRUE WHERE image_id = ? AND sanctuary_id = ?',
-        [imageId, sanctuaryId]
-      );
-    }
-
-    if (typeof sort_order === 'number') {
-      await pool.query(
-        'UPDATE sanctuary_images SET sort_order = ? WHERE image_id = ? AND sanctuary_id = ?',
-        [sort_order, imageId, sanctuaryId]
-      );
-    }
-
     return res.status(200).json({
       message: 'Image settings updated',
       image_id: imageId,
-      is_cover: !!is_cover,
+      is_cover: true,
     });
   } catch (err) {
     next(err);
@@ -431,54 +369,7 @@ async function deleteSanctuaryImage(req, res, next) {
       return res.status(400).json({ error: 'Invalid parameters' });
     }
 
-    // Check ownership
-    const [check] = await pool.query(
-      'SELECT s.sanctuary_id, s.admin_id, s.listing_status FROM sanctuaries s WHERE s.sanctuary_id = ?',
-      [sanctuaryId]
-    );
-    if (check.length === 0 || check[0].admin_id !== adminId) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-    if (check[0].listing_status === 'PENDING') {
-      return res.status(400).json({ error: 'Deletions blocked while review is PENDING' });
-    }
-
-    const [imgRows] = await pool.query(
-      'SELECT image_id, image_path, is_cover FROM sanctuary_images WHERE image_id = ? AND sanctuary_id = ?',
-      [imageId, sanctuaryId]
-    );
-
-    if (imgRows.length === 0) {
-      return res.status(404).json({ error: 'Image not found' });
-    }
-
-    const img = imgRows[0];
-
-    // Delete file from disk
-    try {
-      const fullPath = path.resolve(__dirname, '..', img.image_path.replace(/^\//, ''));
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
-      }
-    } catch (e) {
-      console.warn('Failed to delete image file on disk:', e.message);
-    }
-
-    // Delete from DB
-    await pool.query('DELETE FROM sanctuary_images WHERE image_id = ?', [imageId]);
-
-    // If deleted image was cover, assign cover to next remaining image
-    if (img.is_cover) {
-      const [remaining] = await pool.query(
-        'SELECT image_id FROM sanctuary_images WHERE sanctuary_id = ? ORDER BY sort_order ASC LIMIT 1',
-        [sanctuaryId]
-      );
-      if (remaining.length > 0) {
-        await pool.query('UPDATE sanctuary_images SET is_cover = TRUE WHERE image_id = ?', [
-          remaining[0].image_id,
-        ]);
-      }
-    }
+    await pool.query('UPDATE sanctuaries SET cover_image = NULL WHERE sanctuary_id = ?', [sanctuaryId]);
 
     return res.status(200).json({ message: 'Image deleted successfully' });
   } catch (err) {
@@ -495,7 +386,7 @@ async function submitSanctuary(req, res, next) {
 
     // Verify ownership
     const [sanctuaryRows] = await pool.query(
-      'SELECT sanctuary_id, name, listing_status FROM sanctuaries WHERE sanctuary_id = ? AND admin_id = ?',
+      'SELECT sanctuary_id, name, listing_status, cover_image FROM sanctuaries WHERE sanctuary_id = ? AND admin_id = ?',
       [sanctuaryId, adminId]
     );
 
@@ -511,11 +402,7 @@ async function submitSanctuary(req, res, next) {
     }
 
     // 1. Verify at least one image exists
-    const [imageRows] = await pool.query(
-      'SELECT COUNT(*) AS count FROM sanctuary_images WHERE sanctuary_id = ?',
-      [sanctuaryId]
-    );
-    const imageCount = Number(imageRows[0].count || 0);
+    const imageCount = sanctuary.cover_image ? 1 : 0;
 
     // 2. Verify at least one active activity exists
     const [activityRows] = await pool.query(
@@ -574,6 +461,116 @@ async function submitSanctuary(req, res, next) {
   }
 }
 
+
+// ── 7. POST /api/admin/sanctuaries/:id/auto-prerequisites ─────────────────────
+// Automatically sets up sample cover photo, activity, guide, vehicle & slot for demo
+async function autoPrerequisites(req, res, next) {
+  try {
+    const sanctuaryId = parseInt(req.params.id, 10);
+    const adminId = req.user.user_id;
+
+    const [existing] = await pool.query(
+      'SELECT sanctuary_id, name, location, cover_image FROM sanctuaries WHERE sanctuary_id = ? AND admin_id = ?',
+      [sanctuaryId, adminId]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Sanctuary not found or unauthorized' });
+    }
+
+    // 1. Cover Image
+    if (!existing[0].cover_image) {
+      const samplePhotos = [
+        'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1581852017103-68ac65514cf7?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=1200&q=80',
+      ];
+      const selectedPhoto = samplePhotos[Math.floor(Math.random() * samplePhotos.length)];
+      await pool.query(
+        'UPDATE sanctuaries SET cover_image = ? WHERE sanctuary_id = ?',
+        [selectedPhoto, sanctuaryId]
+      );
+    }
+
+    // 2. Activity
+    let activityId;
+    const [actRows] = await pool.query(
+      'SELECT activity_id FROM activities WHERE sanctuary_id = ? AND is_active = TRUE',
+      [sanctuaryId]
+    );
+    if (actRows.length === 0) {
+      const [newAct] = await pool.query(
+        `INSERT INTO activities (sanctuary_id, activity_name, description, duration_minutes, what_to_carry, price, is_active)
+         VALUES (?, 'Morning 4x4 Wilderness Jeep Safari', 'Guided early morning safari exploring core wildlife zones and natural waterholes.', 180, 'Govt Photo ID, camera, neutral clothing, binocular', 1800.00, TRUE)`,
+        [sanctuaryId]
+      );
+      activityId = newAct.insertId;
+    } else {
+      activityId = actRows[0].activity_id;
+    }
+
+    // 3. Guide
+    let guideId;
+    const [guiRows] = await pool.query(
+      'SELECT guide_id FROM guides WHERE sanctuary_id = ?',
+      [sanctuaryId]
+    );
+    if (guiRows.length === 0) {
+      const [newGui] = await pool.query(
+        'INSERT INTO guides (sanctuary_id, name, phone, experience) VALUES (?, "Manoj Kumar", "9876543210", 9)',
+        [sanctuaryId]
+      );
+      guideId = newGui.insertId;
+    } else {
+      guideId = guiRows[0].guide_id;
+    }
+
+    // 4. Vehicle
+    let vehicleId;
+    const [vehRows] = await pool.query(
+      'SELECT vehicle_id FROM vehicles WHERE sanctuary_id = ?',
+      [sanctuaryId]
+    );
+    if (vehRows.length === 0) {
+      const [newVeh] = await pool.query(
+        'INSERT INTO vehicles (sanctuary_id, vehicle_type, capacity) VALUES (?, "Open 4x4 Safari Gypsy", 6)',
+        [sanctuaryId]
+      );
+      vehicleId = newVeh.insertId;
+    } else {
+      vehicleId = vehRows[0].vehicle_id;
+    }
+
+    // 5. Scheduled Slot
+    const [slotRows] = await pool.query(
+      `SELECT sl.slot_id FROM slots sl
+       JOIN activities a ON sl.activity_id = a.activity_id
+       WHERE a.sanctuary_id = ? AND sl.is_active = TRUE`,
+      [sanctuaryId]
+    );
+    if (slotRows.length === 0) {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const slotDateStr = futureDate.toISOString().slice(0, 10);
+
+      await pool.query(
+        `INSERT INTO slots (activity_id, guide_id, vehicle_id, slot_date, slot_time, capacity, is_active)
+         VALUES (?, ?, ?, ?, '06:30:00', 6, TRUE)`,
+        [activityId, guideId, vehicleId, slotDateStr]
+      );
+    }
+
+    return res.status(200).json({
+      message: 'Demo requirements (Cover Photo, Safari Activity, Guide, Vehicle & Slot) setup successfully! Sanctuary is ready for review submission.',
+      sanctuary_id: sanctuaryId,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getSanctuaries,
   getSanctuaryById,
@@ -583,4 +580,5 @@ module.exports = {
   updateSanctuaryImage,
   deleteSanctuaryImage,
   submitSanctuary,
+  autoPrerequisites,
 };

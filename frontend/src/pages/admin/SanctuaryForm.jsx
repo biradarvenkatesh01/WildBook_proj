@@ -5,6 +5,106 @@ import client from '../../api/client';
 
 const DAY_OPTIONS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+const DEMO_SANCTUARIES = [
+  {
+    name: 'Kanha Tiger Reserve',
+    location: 'Mandla & Balaghat Districts, Madhya Pradesh',
+    description: "The timeless inspiration for Rudyard Kipling's Jungle Book. Features vast sal meadows, bamboo forests, rare hardground barasingha deer, and Bengal tigers.",
+    contact_email: 'kanha.safari@wildbook.com',
+    contact_phone: '9425112233',
+    website: 'https://kanhatigerreserve.org',
+    opening_time: '06:00:00',
+    closing_time: '18:00:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'October to June (Peak sightings March-May)',
+  },
+  {
+    name: 'Sundarbans Tiger Reserve',
+    location: 'South 24 Parganas, West Bengal',
+    description: "The world's largest coastal mangrove forest and UNESCO World Heritage site, home to the swimming Royal Bengal tiger, saltwater crocodiles, and Gangetic dolphins.",
+    contact_email: 'sundarbans.safari@wildbook.com',
+    contact_phone: '9830112233',
+    website: 'https://sundarbanstigerreserve.org',
+    opening_time: '07:00:00',
+    closing_time: '17:30:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'September to March',
+  },
+  {
+    name: 'Tadoba-Andhari Tiger Reserve',
+    location: 'Chandrapur District, Maharashtra',
+    description: "Maharashtra's oldest and largest national park, renowned for exceptional tiger sightings around Tadoba Lake and pristine dry deciduous teak woods.",
+    contact_email: 'tadoba.safari@wildbook.com',
+    contact_phone: '9422114455',
+    website: 'https://mytadoba.org',
+    opening_time: '06:00:00',
+    closing_time: '18:30:00',
+    operating_days: 'Mon, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'November to May',
+  },
+  {
+    name: 'Manas National Park & Biosphere',
+    location: 'Baksa & Chirang, Assam',
+    description: 'UNESCO World Heritage site nestled in Himalayan foothills along the Manas River, sheltering rare pygmy hogs, golden langurs, and wild water buffaloes.',
+    contact_email: 'manas.wildlife@wildbook.com',
+    contact_phone: '9435012345',
+    website: 'https://manasnationalpark.assam.gov.in',
+    opening_time: '06:00:00',
+    closing_time: '17:00:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'November to April',
+  },
+  {
+    name: 'Pench Tiger Reserve',
+    location: 'Seoni & Chhindwara, Madhya Pradesh',
+    description: 'Straddling the Satpura hills along Pench River, this reserve features rich biodiversity, abundant leopard and wild dog packs, and magnificent tiger territory.',
+    contact_email: 'pench.reserve@wildbook.com',
+    contact_phone: '9425887766',
+    website: 'https://penchtigerreserve.org',
+    opening_time: '06:00:00',
+    closing_time: '18:00:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'October to June',
+  },
+  {
+    name: 'Dandeli Wildlife Sanctuary',
+    location: 'Uttara Kannada, Karnataka',
+    description: 'Dense moist deciduous forest on the Kali River, famous for the elusive black panther, great hornbills, white-water kayaking, and guided canopy walks.',
+    contact_email: 'dandeli.ecotourism@wildbook.com',
+    contact_phone: '9448110022',
+    website: 'https://dandeliwildlife.org',
+    opening_time: '06:30:00',
+    closing_time: '18:00:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'October to May',
+  },
+  {
+    name: 'Satpura Tiger Reserve & Denwa River',
+    location: 'Narmadapuram District, Madhya Pradesh',
+    description: 'Rugged terrain featuring sandstone peaks, gorges, and dense teak forests, offering unique walking safaris, canoeing, and sloth bear tracking.',
+    contact_email: 'satpura.reserve@wildbook.com',
+    contact_phone: '9425443322',
+    website: 'https://satpuratigerreserve.org',
+    opening_time: '06:00:00',
+    closing_time: '18:00:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'October to April',
+  },
+  {
+    name: 'Eravikulam High-Altitude Reserve',
+    location: 'Munnar, Idukki District, Kerala',
+    description: 'High-altitude shola-grassland sanctuary protecting the endangered Nilgiri Tahr and the spectacular blooming Neelakurinji flowers across rolling peaks.',
+    contact_email: 'eravikulam@wildbook.com',
+    contact_phone: '9447979090',
+    website: 'https://eravikulam.org',
+    opening_time: '07:30:00',
+    closing_time: '16:00:00',
+    operating_days: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun',
+    best_time_to_visit: 'September to February',
+  },
+];
+
+
 export default function SanctuaryForm() {
   const { id } = useParams();
   const isEditMode = Boolean(id);
@@ -32,6 +132,68 @@ export default function SanctuaryForm() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [settingUpPrereqs, setSettingUpPrereqs] = useState(false);
+  const [demoIdx, setDemoIdx] = useState(() => {
+    const saved = localStorage.getItem('wb_demo_sanc_idx');
+    return saved !== null ? parseInt(saved, 10) % DEMO_SANCTUARIES.length : 0;
+  });
+
+  // Cycle and auto-fill rotating demo sanctuary data
+  const handleAutoFillDemo = () => {
+    const sanctuaryToFill = DEMO_SANCTUARIES[demoIdx];
+    const nextIdx = (demoIdx + 1) % DEMO_SANCTUARIES.length;
+
+    setFormData({
+      name: sanctuaryToFill.name,
+      location: sanctuaryToFill.location,
+      description: sanctuaryToFill.description,
+      contact_email: sanctuaryToFill.contact_email,
+      contact_phone: sanctuaryToFill.contact_phone,
+      website: sanctuaryToFill.website,
+      opening_time: sanctuaryToFill.opening_time,
+      closing_time: sanctuaryToFill.closing_time,
+      operating_days: sanctuaryToFill.operating_days,
+      best_time_to_visit: sanctuaryToFill.best_time_to_visit,
+    });
+
+    const parsedDays = sanctuaryToFill.operating_days
+      .split(',')
+      .map((d) => d.trim())
+      .filter((d) => DAY_OPTIONS.includes(d));
+    if (parsedDays.length > 0) setSelectedDays(parsedDays);
+
+    setDemoIdx(nextIdx);
+    localStorage.setItem('wb_demo_sanc_idx', nextIdx.toString());
+
+    setSuccessMsg(`Filled demo data: "${sanctuaryToFill.name}". (Next auto-fill will load: "${DEMO_SANCTUARIES[nextIdx].name}")`);
+    setError('');
+  };
+
+  // 1-Click setup demo prerequisites (Photo, Activity, Guide, Vehicle, Slot)
+  const handleAutoSetupPrerequisites = async () => {
+    if (!isEditMode) {
+      alert('Please save the sanctuary draft first before setting up demo requirements.');
+      return;
+    }
+    setError('');
+    setSuccessMsg('');
+    try {
+      setSettingUpPrereqs(true);
+      const res = await client.post(`/admin/sanctuaries/${id}/auto-prerequisites`);
+      setSuccessMsg(res.message || 'Demo requirements setup successfully! Sanctuary is ready for approval submission.');
+      
+      // Reload sanctuary images
+      const fresh = await client.get(`/admin/sanctuaries/${id}`);
+      if (fresh?.sanctuary?.images) {
+        setImages(fresh.sanctuary.images);
+      }
+    } catch (err) {
+      setError(err.data?.error || err.message || 'Failed to auto-setup requirements');
+    } finally {
+      setSettingUpPrereqs(false);
+    }
+  };
+
 
   // Fetch sanctuary details if editing
   useEffect(() => {
@@ -269,6 +431,45 @@ export default function SanctuaryForm() {
           <p className="text-xs text-gray-500 mt-1">
             Fill in the details below to configure and preview your sanctuary.
           </p>
+        </div>
+
+        
+        {/* Demo Fast-Track Toolbar */}
+        <div className="mb-6 bg-gradient-to-r from-[#1F3D2B]/10 via-[#D9A441]/15 to-[#1F3D2B]/5 border border-[#D9A441]/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#D9A441] text-[#1F3D2B]">
+                ⚡ DEMO HELPER
+              </span>
+              <span className="text-xs text-gray-600 font-medium">
+                Next in rotation: <strong className="text-[#1F3D2B]">{DEMO_SANCTUARIES[demoIdx].name}</strong> ({demoIdx + 1}/{DEMO_SANCTUARIES.length})
+              </span>
+            </div>
+            <p className="text-xs text-gray-600">
+              Auto-fills rotating, authentic Indian reserve details with 10-digit phones, hours, and descriptions.
+            </p>
+          </div>
+          <div className="flex items-center flex-wrap gap-2.5 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={handleAutoFillDemo}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#1F3D2B] text-[#F6F1E7] hover:bg-[#152a1d] font-semibold text-xs transition shadow-xs active:scale-[0.98]"
+              title="Click to cycle to the next demo sanctuary"
+            >
+              <span>✨ Auto-fill Demo Sanctuary</span>
+            </button>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleAutoSetupPrerequisites}
+                disabled={settingUpPrereqs}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#D9A441] text-[#1F3D2B] hover:bg-[#c99534] font-semibold text-xs transition shadow-xs active:scale-[0.98] disabled:opacity-50"
+                title="Automatically attaches a cover photo, safari activity, guide, vehicle & slot"
+              >
+                <span>{settingUpPrereqs ? '⚡ Setting up...' : '⚡ 1-Click Setup Requirements'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Notifications */}
@@ -622,6 +823,18 @@ export default function SanctuaryForm() {
               >
                 {saving ? 'Saving draft...' : 'Save draft'}
               </button>
+
+                            {isEditMode && (
+                <button
+                  type="button"
+                  onClick={handleAutoSetupPrerequisites}
+                  disabled={settingUpPrereqs || saving || submitting}
+                  className="py-2.5 px-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 font-semibold text-xs hover:bg-amber-100 active:scale-[0.99] transition shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                  title="Auto-attach cover photo, activity, guide, vehicle & slot to pass submission check"
+                >
+                  <span>{settingUpPrereqs ? '⚡ Attaching...' : '⚡ 1-Click Setup Requirements'}</span>
+                </button>
+              )}
 
               {/* Submit for approval — enabled in Phase 6 */}
               <button

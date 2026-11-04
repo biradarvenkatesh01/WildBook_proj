@@ -28,7 +28,7 @@ async function main() {
     console.log('-> [1/5] Applying 01_schema.sql...');
     const schemaSql = fs.readFileSync(path.join(__dirname, '01_schema.sql'), 'utf8');
     await pool.query(schemaSql);
-    console.log('   ✓ Schema created successfully (14 tables + indexes)');
+    console.log('   ✓ Schema created successfully (9 tables + indexes)');
 
     // 2. Run 02_triggers.sql
     console.log('-> [2/5] Applying 02_triggers.sql...');
@@ -170,18 +170,6 @@ async function main() {
       'Only an APPROVED admin can add slots'
     );
 
-    // TEST 7: Review without a past CONFIRMED booking is rejected (Trigger)
-    await assertThrows(
-      'Trigger rejects review on future/uncompleted booking',
-      async () => {
-        // Booking 2 is for future slot (2026-11-20)
-        await pool.query(
-          "INSERT INTO reviews (booking_id, user_id, sanctuary_id, rating, comment) VALUES (2, 4, 1, 5, 'Too early!')"
-        );
-      },
-      'Cannot review a slot that has not yet occurred'
-    );
-
     // TEST 8: Overbooking prevention (Capacity 10, 8 booked: 3 rejected, 2 accepted)
     // Setup a slot with capacity 10 using vehicle 3 (capacity 20)
     const [act] = await pool.query(
@@ -257,7 +245,7 @@ async function main() {
       'SELECT @c_status AS status, @c_fee AS fee, @c_ref AS refund'
     );
     const [[cancelRow]] = await pool.query(
-      'SELECT c.*, b.status AS b_status, p.payment_status AS p_status FROM cancellations c JOIN bookings b ON c.booking_id = b.booking_id JOIN payments p ON b.booking_id = p.booking_id WHERE c.booking_id = ?',
+      'SELECT b.*, b.status AS b_status, p.payment_status AS p_status FROM bookings b JOIN payments p ON b.booking_id = p.booking_id WHERE b.booking_id = ?',
       [res8.id]
     );
     assertTrue(
@@ -267,7 +255,7 @@ async function main() {
         Number(cancelRes.refund) === 4800.0 &&
         cancelRow.b_status === 'CANCELLED' &&
         cancelRow.p_status === 'PARTIALLY_REFUNDED' &&
-        Number(cancelRow.fee_percent) === 40.0,
+        Number(cancelRow.cancellation_fee) === 3200.0,
       `fee=${cancelRes.fee}, refund=${cancelRes.refund}, b_status=${cancelRow?.b_status}, p_status=${cancelRow?.p_status}`
     );
 

@@ -5,6 +5,16 @@ import client from '../../api/client';
 import Logo from '../../components/Logo';
 import { LightningIcon } from '../../components/Icons';
 
+
+const DEMO_VISITORS = [
+  { name: 'Aditi Rao', emailPrefix: 'aditi.rao', phone: '9876543210' },
+  { name: 'Rohan Verma', emailPrefix: 'rohan.verma', phone: '9812345670' },
+  { name: 'Sneha Kulkarni', emailPrefix: 'sneha.kulkarni', phone: '9740123456' },
+  { name: 'Vikramaditya Sen', emailPrefix: 'vikram.sen', phone: '9425123456' },
+  { name: 'Maya Patel', emailPrefix: 'maya.patel', phone: '9825123456' },
+  { name: 'Arjun Nair', emailPrefix: 'arjun.nair', phone: '9447123456' },
+];
+
 export default function VisitorSignup() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +37,30 @@ export default function VisitorSignup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [visitorIdx, setVisitorIdx] = useState(() => {
+    const saved = localStorage.getItem('wb_demo_visitor_signup_idx');
+    return saved !== null ? parseInt(saved, 10) % DEMO_VISITORS.length : 0;
+  });
+
+  const handleAutoFillDemo = () => {
+    const v = DEMO_VISITORS[visitorIdx];
+    const rand = Math.floor(100 + Math.random() * 900);
+    const nextIdx = (visitorIdx + 1) % DEMO_VISITORS.length;
+
+    setFormData({
+      name: v.name,
+      email: `${v.emailPrefix}${rand}@wildbook.com`,
+      phone: v.phone,
+      password: 'Visitor@123',
+      confirmPassword: 'Visitor@123',
+      agreeTerms: true,
+    });
+
+    setVisitorIdx(nextIdx);
+    localStorage.setItem('wb_demo_visitor_signup_idx', nextIdx.toString());
+    setError('');
+  };
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -79,6 +113,9 @@ export default function VisitorSignup() {
         password: formData.password,
       });
 
+      // Advance demo index for next registration
+      const currentIdx = parseInt(localStorage.getItem('wb_demo_visitor_signup_idx') || '0', 10);
+      localStorage.setItem('wb_demo_visitor_signup_idx', ((currentIdx + 1) % DEMO_VISITORS.length).toString());
       login(res.user, res.token);
       navigate(from, { replace: true });
     } catch (err) {
@@ -159,35 +196,34 @@ export default function VisitorSignup() {
             </div>
           )}
 
-          {/* Demo Helper Card */}
-          <div className="mb-5 p-3.5 rounded-2xl bg-[#F6F1E7]/90 border border-[#D5C9B5] text-xs">
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#D9A441] animate-pulse" />
-                <span>Demo Registration Details</span>
+          {/* Demo Helper Card - Rotating Visitors */}
+          <div className="mb-5 p-4 rounded-2xl bg-gradient-to-r from-[#F6F1E7] via-amber-50 to-[#F6F1E7] border-2 border-[#D9A441]/60 text-xs shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2">
+              <div>
+                <div className="flex items-center gap-1.5 font-semibold text-[#1F3D2B]">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#D9A441] animate-pulse" />
+                  <span className="text-sm font-serif font-bold">Auto-fill Demo Traveller</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D9A441] text-[#1F3D2B]">
+                    {visitorIdx + 1} of {DEMO_VISITORS.length}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-700 mt-0.5">
+                  Next in queue: <strong className="text-[#1F3D2B]">{DEMO_VISITORS[visitorIdx]?.name}</strong>
+                </p>
               </div>
+
               <button
                 type="button"
-                onClick={() => {
-                  const rand = Math.floor(100 + Math.random() * 900);
-                  setFormData({
-                    name: 'Aditi Rao',
-                    email: `aditi.rao${rand}@wildbook.com`,
-                    phone: '9876543210',
-                    password: 'Visitor@123',
-                    confirmPassword: 'Visitor@123',
-                    agreeTerms: true,
-                  });
-                  setError('');
-                }}
-                className="px-2.5 py-1 rounded-lg bg-[#1F3D2B] text-white hover:bg-[#162B1D] font-medium text-[11px] transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                onClick={handleAutoFillDemo}
+                className="px-3.5 py-2 rounded-xl bg-[#1F3D2B] text-[#F6F1E7] hover:bg-[#162B1D] font-semibold text-xs transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                title="Click to cycle and auto-fill next traveller"
               >
                 <LightningIcon className="w-3.5 h-3.5 text-[#D9A441]" />
-                <span>Auto-fill Demo Data</span>
+                <span>Auto-fill: {DEMO_VISITORS[visitorIdx]?.name}</span>
               </button>
             </div>
-            <p className="text-[11px] text-[#666]">
-              Instantly fills valid visitor details with terms accepted for demonstration.
+            <p className="text-[11px] text-gray-600 border-t border-[#D5C9B5]/50 pt-1.5 mt-1">
+              ⚡ <strong>Clicking auto-fill rotates to the next traveller</strong> (Next: {DEMO_VISITORS[(visitorIdx + 1) % DEMO_VISITORS.length]?.name}).
             </p>
           </div>
 

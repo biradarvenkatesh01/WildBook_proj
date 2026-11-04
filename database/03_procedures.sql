@@ -1,6 +1,5 @@
 -- ==============================================================================
--- WildBook: 03_procedures.sql
--- Transactional Stored Procedures for Booking, Payment & Cancellation Lifecycle
+-- WildBook: 03_procedures.sql (Optimized 9-Table Procedures)
 -- ==============================================================================
 
 DELIMITER $$
@@ -66,7 +65,7 @@ proc_block: BEGIN
     LEAVE proc_block;
   END IF;
 
-  -- 4. Calculate total amount and generate unique booking code (e.g. WB-ABC12345)
+  -- 4. Calculate total amount
   SET v_total = v_price * p_people;
   SET v_new_code = CONCAT('WB-', UPPER(SUBSTRING(MD5(CONCAT(UUID(), RAND())), 1, 8)));
 
@@ -165,6 +164,7 @@ END$$
 -- ------------------------------------------------------------------------------
 -- 3. PROCEDURE: sp_cancel_booking
 -- Cancels a confirmed future booking: 40% cancellation fee, 60% refund
+-- Writes directly into bookings table (eliminating cancellations table)
 -- ------------------------------------------------------------------------------
 DROP PROCEDURE IF EXISTS sp_cancel_booking$$
 CREATE PROCEDURE sp_cancel_booking(
@@ -219,15 +219,14 @@ proc_block: BEGIN
   SET v_fee = ROUND(v_amount * 0.40, 2);
   SET v_refund = v_amount - v_fee;
 
-  -- Mark booking CANCELLED
-  UPDATE bookings SET status = 'CANCELLED' WHERE booking_id = p_booking_id;
-
-  -- Insert cancellation audit row
-  INSERT INTO cancellations (
-    booking_id, cancelled_at, amount_paid, fee_percent, fee_amount, refund_amount
-  ) VALUES (
-    p_booking_id, NOW(), v_amount, 40.00, v_fee, v_refund
-  );
+  -- Update booking with cancellation details directly
+  UPDATE bookings 
+  SET status = 'CANCELLED',
+      cancelled_at = NOW(),
+      cancellation_reason = 'Cancelled by guest',
+      cancellation_fee = v_fee,
+      refund_amount = v_refund
+  WHERE booking_id = p_booking_id;
 
   -- Mark payment PARTIALLY_REFUNDED
   UPDATE payments 
