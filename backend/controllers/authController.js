@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const pool = require('../config/db');
+const { getSanctuaryPhoto } = require('../utils/sanctuaryPhotos');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'wildbook_secret_jwt_key_2026';
 const JWT_EXPIRES_IN = '2h';
@@ -400,18 +401,21 @@ async function adminSignup(req, res, next) {
       ]
     );
 
-    // 3. Provision initial sanctuary for operator registration
+    // 3. Provision initial sanctuary for operator registration with distinct matching photo
+    const coverPhoto = getSanctuaryPhoto(organisation_name);
+
     const [sancRes] = await conn.query(
       `INSERT INTO sanctuaries (
         admin_id, name, location, description, cover_image, average_rating, total_reviews, contact_email, contact_phone, 
         website, opening_time, closing_time, operating_days, best_time_to_visit, 
         listing_status
-      ) VALUES (?, ?, ?, ?, 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=80', 5.0, 1, ?, ?, ?, '06:00:00', '18:00:00', 'Monday to Sunday', 'October to May', 'PENDING')`,
+      ) VALUES (?, ?, ?, ?, ?, 5.0, 1, ?, ?, ?, '06:00:00', '18:00:00', 'Monday to Sunday', 'October to May', 'PENDING')`,
       [
         newAdminId,
         organisation_name.trim(),
         registered_address.trim(),
         `Official wildlife sanctuary and protected natural habitat managed by ${organisation_name.trim()}.`,
+        coverPhoto,
         email.toLowerCase().trim(),
         cleanPhone,
         website ? website.trim() : null,

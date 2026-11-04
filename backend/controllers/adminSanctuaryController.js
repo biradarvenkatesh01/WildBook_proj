@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const pool = require('../config/db');
+const { getSanctuaryPhoto } = require('../utils/sanctuaryPhotos');
 
 // ── 1. GET /api/admin/sanctuaries ─────────────────────────────────────────────
 // Returns all sanctuaries managed by the authenticated administrator
@@ -137,17 +138,20 @@ async function createSanctuary(req, res, next) {
       }
     }
 
+    const distinctCover = req.body.cover_image || getSanctuaryPhoto(name);
+
     const [result] = await pool.query(
       `INSERT INTO sanctuaries (
-        admin_id, name, location, description, contact_email, contact_phone, 
+        admin_id, name, location, description, cover_image, contact_email, contact_phone, 
         website, opening_time, closing_time, operating_days, best_time_to_visit, 
         latitude, longitude, listing_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT')`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT')`,
       [
         adminId,
         name.trim(),
         location.trim(),
         description.trim(),
+        distinctCover,
         contact_email ? contact_email.trim() : null,
         cleanPhone,
         website ? website.trim() : null,
@@ -478,16 +482,9 @@ async function autoPrerequisites(req, res, next) {
       return res.status(404).json({ error: 'Sanctuary not found or unauthorized' });
     }
 
-    // 1. Cover Image
+    // 1. Distinct Cover Image matching sanctuary name
     if (!existing[0].cover_image) {
-      const samplePhotos = [
-        'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1581852017103-68ac65514cf7?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1575550959106-5a7defe28b56?auto=format&fit=crop&w=1200&q=80',
-      ];
-      const selectedPhoto = samplePhotos[Math.floor(Math.random() * samplePhotos.length)];
+      const selectedPhoto = getSanctuaryPhoto(existing[0].name);
       await pool.query(
         'UPDATE sanctuaries SET cover_image = ? WHERE sanctuary_id = ?',
         [selectedPhoto, sanctuaryId]
@@ -543,23 +540,29 @@ async function autoPrerequisites(req, res, next) {
       vehicleId = vehRows[0].vehicle_id;
     }
 
-    // 5. Scheduled Slot
-    const [slotRows] = await pool.query(
-      `SELECT sl.slot_id FROM slots sl
-       JOIN activities a ON sl.activity_id = a.activity_id
-       WHERE a.sanctuary_id = ? AND sl.is_active = TRUE`,
-      [sanctuaryId]
+    // 5. Scheduled Slot (Only created if admin is APPROVED, compliant with database trigger trg_slot_admin_approved_insert)
+    const [adminCheck] = await pool.query(
+      'SELECT account_status FROM users WHERE user_id = ?',
+      [req.user.user_id]
     );
-    if (slotRows.length === 0) {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 7);
-      const slotDateStr = futureDate.toISOString().slice(0, 10);
-
-      await pool.query(
-        `INSERT INTO slots (activity_id, guide_id, vehicle_id, slot_date, slot_time, capacity, is_active)
-         VALUES (?, ?, ?, ?, '06:30:00', 6, TRUE)`,
-        [activityId, guideId, vehicleId, slotDateStr]
+    if (adminCheck.length > 0 && adminCheck[0].account_status === 'APPROVED') {
+      const [slotRows] = await pool.query(
+        `SELECT sl.slot_id FROM slots sl
+         JOIN activities a ON sl.activity_id = a.activity_id
+         WHERE a.sanctuary_id = ? AND sl.is_active = TRUE`,
+        [sanctuaryId]
       );
+      if (slotRows.length === 0) {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 7);
+        const slotDateStr = futureDate.toISOString().slice(0, 10);
+
+        await pool.query(
+          `INSERT INTO slots (activity_id, guide_id, vehicle_id, slot_date, slot_time, capacity, is_active)
+           VALUES (?, ?, ?, ?, '06:30:00', 6, TRUE)`,
+          [activityId, guideId, vehicleId, slotDateStr]
+        );
+      }
     }
 
     return res.status(200).json({

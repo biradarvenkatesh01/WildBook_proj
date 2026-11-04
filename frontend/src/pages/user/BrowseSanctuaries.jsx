@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import client from '../../api/client';
 import { LeafIcon } from '../../components/Icons';
+import { getSanctuaryPhoto } from '../../utils/sanctuaryPhotos';
 
 export default function BrowseSanctuaries() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -203,7 +204,7 @@ export default function BrowseSanctuaries() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sanctuaries.map((s) => {
-                const cover = s.cover_image || 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
+                const cover = s.cover_image || getSanctuaryPhoto(s.name, s.sanctuary_id);
                 const startingPrice = s.starting_price ? Number(s.starting_price) : 200;
                 const formattedPrice = `from ₹${startingPrice.toLocaleString('en-IN')} / person`;
                 const hasReviews = s.total_reviews > 0 && s.average_rating > 0;
@@ -223,7 +224,7 @@ export default function BrowseSanctuaries() {
                           alt={s.name}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
+                            e.currentTarget.src = getSanctuaryPhoto(s.name, s.sanctuary_id);
                           }}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                         />

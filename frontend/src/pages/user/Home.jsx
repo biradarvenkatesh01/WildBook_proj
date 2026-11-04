@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import client from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { getSanctuaryPhoto } from '../../utils/sanctuaryPhotos';
 
 // Animal photo slides for Hero Carousel
 const HERO_SLIDES = [
@@ -226,11 +227,11 @@ export default function Home() {
               >
                 {/* Background Image */}
                 <img
-                  src={s.cover_image || 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80'}
+                  src={s.cover_image || getSanctuaryPhoto(s.name, s.sanctuary_id)}
                   alt={s.name}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80';
+                    e.currentTarget.src = getSanctuaryPhoto(s.name, s.sanctuary_id);
                   }}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
                 />
