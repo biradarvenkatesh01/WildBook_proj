@@ -5,6 +5,7 @@ export default function CancelBookingModal({ isOpen, bookingId, onClose, onCance
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [eraseRecord, setEraseRecord] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -33,7 +34,9 @@ export default function CancelBookingModal({ isOpen, bookingId, onClose, onCance
     try {
       setCancelling(true);
       setError(null);
-      const res = await client.post(`/bookings/${bookingId}/cancel`);
+      const res = eraseRecord
+        ? await client.delete(`/bookings/${bookingId}`)
+        : await client.post(`/bookings/${bookingId}/cancel`);
       if (res.success) {
         onCancelled(res);
         onClose();
@@ -58,7 +61,7 @@ export default function CancelBookingModal({ isOpen, bookingId, onClose, onCance
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-lg transition"
+          className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-lg transition cursor-pointer"
           aria-label="Close"
         >
           ✕
@@ -149,6 +152,19 @@ export default function CancelBookingModal({ isOpen, bookingId, onClose, onCance
               </div>
             </div>
 
+            {/* Erase Booking Option (No separate table) */}
+            <label className="flex items-center gap-2.5 text-xs text-gray-700 bg-stone-50 p-3 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-100 transition">
+              <input
+                type="checkbox"
+                checked={eraseRecord}
+                onChange={(e) => setEraseRecord(e.target.checked)}
+                className="rounded text-[#1F3D2B] focus:ring-[#D9A441] w-4 h-4 cursor-pointer"
+              />
+              <span className="text-[11px] font-medium">
+                Erase booking record completely & immediately release seats
+              </span>
+            </label>
+
             <p className="text-[11px] text-gray-500 text-center leading-relaxed">
               Refund will be processed to the original payment method within 7–10 business days.
             </p>
@@ -158,7 +174,7 @@ export default function CancelBookingModal({ isOpen, bookingId, onClose, onCance
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 px-4 rounded-xl bg-[#1F3D2B] text-white font-semibold text-xs hover:bg-[#162d20] transition shadow-xs flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 px-4 rounded-xl bg-[#1F3D2B] text-white font-semibold text-xs hover:bg-[#162d20] transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>🌿</span>
                 <span>Keep booking</span>
@@ -168,7 +184,7 @@ export default function CancelBookingModal({ isOpen, bookingId, onClose, onCance
                 type="button"
                 onClick={handleConfirmCancel}
                 disabled={cancelling}
-                className="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-semibold text-xs hover:bg-red-50 transition shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-semibold text-xs hover:bg-red-50 transition shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {cancelling ? (
                   <span>Cancelling...</span>

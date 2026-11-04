@@ -19,8 +19,11 @@ router.get('/mine', bookingController.getMyBookings);
 // GET /api/bookings/:id/cancel-preview: Cancellation fee breakdown
 router.get('/:id/cancel-preview', bookingController.getCancelPreview);
 
-// POST /api/bookings/:id/cancel: Cancel confirmed booking via sp_cancel_booking
+// POST /api/bookings/:id/cancel: Cancel confirmed booking (supports { erase: true } or status update)
 router.post('/:id/cancel', bookingController.cancelBooking);
+
+// DELETE /api/bookings/:id: Erase booking directly from database (cascades payments, releases seats, 0 extra tables)
+router.delete('/:id', bookingController.eraseBooking);
 
 // GET /api/bookings/:id: View booking details (owner only, with remaining hold seconds)
 router.get('/:id', bookingController.getBookingById);

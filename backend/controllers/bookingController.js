@@ -634,6 +634,28 @@ async function cancelBooking(req, res, next) {
       return res.status(403).json({ error: 'Forbidden: You do not have permission to cancel this booking' });
     }
 
+    // If client requested direct erasure without separate table
+    if (req.body?.erase === true || req.query?.erase === 'true') {
+      const conn = await pool.getConnection();
+      try {
+        await conn.beginTransaction();
+        await conn.query('DELETE FROM payments WHERE booking_id = ?', [bookingId]);
+        await conn.query('DELETE FROM bookings WHERE booking_id = ?', [bookingId]);
+        await conn.commit();
+        return res.json({
+          success: true,
+          erased: true,
+          message: 'Booking successfully cancelled and erased. Your seats have been released.',
+          booking_id: bookingId,
+        });
+      } catch (err) {
+        await conn.rollback();
+        throw err;
+      } finally {
+        conn.release();
+      }
+    }
+
     // Call stored procedure
     await pool.query(
       'CALL sp_cancel_booking(?, ?, @status_code, @fee_amount, @refund_amount)',
@@ -669,6 +691,69 @@ async function cancelBooking(req, res, next) {
   }
 }
 
+/**
+ * DELETE /api/bookings/:id
+ * Erases booking info directly from the database without requiring any separate table.
+ * Foreign key ON DELETE CASCADE automatically removes payment record,
+ * immediately releases slot seats in v_slot_availability, and erases the booking.
+ */
+async function eraseBooking(req, res, next) {
+  try {
+    const bookingId = parseInt(req.params.id, 10);
+    if (isNaN(bookingId)) {
+      return res.status(400).json({ error: 'Invalid booking ID' });
+    }
+
+    const userId = req.user.user_id;
+
+    // Check booking exists and caller has permission
+    const [[booking]] = await pool.query(
+      `SELECT b.booking_id, b.booking_code, b.user_id, b.status, s.slot_date, s.slot_time,
+              TIMESTAMP(s.slot_date, s.slot_time) <= NOW() AS is_past
+       FROM bookings b
+       JOIN slots s ON b.slot_id = s.slot_id
+       WHERE b.booking_id = ?`,
+      [bookingId]
+    );
+
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    if (req.user.role !== 'SITE_OWNER' && booking.user_id !== userId) {
+      return res.status(403).json({ error: 'Forbidden: You do not have permission to cancel this booking' });
+    }
+
+    if (booking.is_past) {
+      return res.status(400).json({ error: 'Cannot cancel a booking that has already started or occurred' });
+    }
+
+    // Erase booking row and associated payment cleanly in transaction (0 extra tables needed)
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      await conn.query('DELETE FROM payments WHERE booking_id = ?', [bookingId]);
+      await conn.query('DELETE FROM bookings WHERE booking_id = ?', [bookingId]);
+      await conn.commit();
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+
+    return res.json({
+      success: true,
+      erased: true,
+      message: 'Booking successfully cancelled and erased. Your seats have been released.',
+      booking_id: bookingId,
+      booking_code: booking.booking_code,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createBooking,
   getBookingById,
@@ -677,4 +762,5 @@ module.exports = {
   getMyBookings,
   getCancelPreview,
   cancelBooking,
+  eraseBooking,
 };
