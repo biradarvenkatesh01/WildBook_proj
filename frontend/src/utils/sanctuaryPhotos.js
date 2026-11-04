@@ -126,3 +126,4 @@ export function getSanctuaryPhoto(nameOrOrg = '', fallbackIndex = 0) {
   const idx = Math.abs(hash + fallbackIndex) % SANCTUARY_PHOTOS.length;
   return SANCTUARY_PHOTOS[idx].url;
 }
+
