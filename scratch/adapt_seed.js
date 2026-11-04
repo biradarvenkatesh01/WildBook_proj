@@ -151,3 +151,4 @@ for (let b = 1; b <= 14; b++) {
 
 fs.writeFileSync(seedFile, s, 'utf8');
 console.log('✓ Successfully adapted 05_seed.sql for 9-table schema');
+

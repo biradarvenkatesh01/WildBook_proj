@@ -140,9 +140,9 @@ This document provides a comprehensive, step-by-step breakdown of the entire Wil
 * `pages/user/SanctuaryDetail.jsx`: Sanctuary details, operating hours, and activities list.
 * `pages/user/Payment.jsx`: Checkout page with live 10-minute hold countdown timer and mock payment gateway.
 * `pages/user/Bookings.jsx`: Visitor dashboard with tabbed booking history and PDF ticket download.
-* `pages/admin/Signup.jsx`: Admin registration featuring **8-Operator Rotating Auto-fill**.
+* `pages/admin/Signup.jsx`: Admin registration featuring **18-Operator Rotating Auto-fill**.
 * `pages/admin/Dashboard.jsx`: Operator operations dashboard with occupancy stats and slot calendars.
-* `pages/admin/SanctuaryForm.jsx`: Sanctuary creator with 1-click &ldquo;Demo Prerequisites&rdquo; button.
+* `pages/admin/SanctuaryForm.jsx`: Sanctuary creator with **16-Sanctuary Rotating Auto-fill** and 1-click &ldquo;Demo Prerequisites&rdquo; button.
 * `pages/owner/AdminRequests.jsx`: Site Owner portal for reviewing operator registrations and PDF proofs.
 * `pages/owner/Stats.jsx`: Site Owner platform analytics and occupancy heatmaps.
 
@@ -150,20 +150,45 @@ This document provides a comprehensive, step-by-step breakdown of the entire Wil
 
 ## 4. Rotating Demo Auto-Fill Queues
 
-### Admin Operator Rotation (8 Candidates)
-1. **Dr. Ananya Roy** — Sundarbans Biosphere Reserve
-2. **Vikramaditya Chauhan** — Jim Corbett National Park
-3. **Kavitha Manjunath** — Bhadra Bio-Resilience Society
-4. **Dr. Rajesh Kumar** — Kabini Wildlife Reserve
-5. **Bikash Chandra Mohanty** — Similipal Biosphere Reserve
-6. **Fateh Singh Bhati** — Thar Desert Wildlife Protection Trust
-7. **Pemba Lepcha** — Khangchendzonga High-Altitude Sanctuary
-8. **Dr. S. Karthikeyan** — Anamalai Rainforest Conservation Trust
+### Admin Operator Rotation (18 Diverse Wildlife Reserves)
+1. **Tsering Namgyal** — Hemis High Altitude National Park Trust (Ladakh)
+2. **Raghvendra Pratap Singh** — Dudhwa Terai Conservation Foundation (Uttar Pradesh)
+3. **Dr. Geetha Parameswaran** — Silent Valley Rainforest Sanctuary Trust (Kerala)
+4. **Kavitha Manjunath** — Bhadra Bio-Resilience Society (Karnataka)
+5. **Bikash Chandra Mohanty** — Similipal Biosphere Reserve Foundation (Odisha)
+6. **Fateh Singh Bhati** — Thar Desert Wildlife Protection Trust (Rajasthan)
+7. **Pemba Lepcha** — Khangchendzonga Alpine Reserve Society (Sikkim)
+8. **Dr. S. Karthikeyan** — Anamalai Hills Conservation Foundation (Tamil Nadu)
+9. **Dr. Hemant Goswami** — Corbett Tiger Conservation Society (Uttarakhand)
+10. **L. Krishnamoorthy** — Kanha Tiger Reserve Ecotourism Society (Madhya Pradesh)
+11. **Subrata Mukherjee** — Sundarbans Mangrove Biosphere Trust (West Bengal)
+12. **Pushpendra Singh** — Bandhavgarh Wildlife Foundation (Madhya Pradesh)
+13. **Chandra Kant Sharma** — Manas Riverine Habitat Protection Trust (Assam)
+14. **Deepa Radhakrishnan** — Eravikulam Mountain Ecosystem Board (Kerala)
+15. **Prabhunath Shukla** — Pench Satpura Wildlife Corridor Trust (Maharashtra/MP)
+16. **Uttam Kumar Sharma** — Panna Ken River Wildlife Conservation Council (Madhya Pradesh)
+17. **Amitabh Joshi** — Nanda Devi & Valley of Flowers Biosphere Authority (Uttarakhand)
+18. **P. K. Verma** — Kuno National Park Cheetah Conservation Society (Madhya Pradesh)
 
-### Visitor Registration Rotation (6 Travellers)
-1. **Aditi Rao** — `aditi.rao@wildbook.com`
-2. **Rohan Verma** — `rohan.verma@wildbook.com`
-3. **Sneha Kulkarni** — `sneha.kulkarni@wildbook.com`
-4. **Vikramaditya Sen** — `vikramaditya.sen@wildbook.com`
-5. **Maya Patel** — `maya.patel@wildbook.com`
-6. **Arjun Nair** — `arjun.nair@wildbook.com`
+### Visitor Registration Rotation (18 Diverse Travellers)
+1. **Aditi Rao** — `aditi.rao@wildbook.com` (`9876543210`)
+2. **Rohan Verma** — `rohan.verma@wildbook.com` (`9812345670`)
+3. **Sneha Kulkarni** — `sneha.kulkarni@wildbook.com` (`9740123456`)
+4. **Vikramaditya Sen** — `vikramaditya.sen@wildbook.com` (`9425123456`)
+5. **Maya Patel** — `maya.patel@wildbook.com` (`9825123456`)
+6. **Arjun Nair** — `arjun.nair@wildbook.com` (`9447123456`)
+7. **Priya Deshmukh** — `priya.deshmukh@wildbook.com` (`9822012345`)
+8. **Ananya Iyer** — `ananya.iyer@wildbook.com` (`9840156789`)
+9. **Siddharth Malhotra** — `siddharth.m@wildbook.com` (`9810123456`)
+10. **Tanvi Joshi** — `tanvi.joshi@wildbook.com` (`9422034567`)
+11. **Kabir Mehta** — `kabir.mehta@wildbook.com` (`9820067890`)
+12. **Devika Menon** — `devika.menon@wildbook.com` (`9446012345`)
+13. **Rohit Bhattacharya** — `rohit.bhatta@wildbook.com` (`9830023456`)
+14. **Ishaan Saxena** — `ishaan.saxena@wildbook.com` (`9415034567`)
+15. **Nandini Reddy** — `nandini.reddy@wildbook.com` (`9848045678`)
+16. **Varun Chadha** — `varun.chadha@wildbook.com` (`9811056789`)
+17. **Meera Singhania** — `meera.singh@wildbook.com` (`9829067890`)
+18. **Akash Deep** — `akash.deep@wildbook.com` (`9431078901`)
+
+### Sanctuary Creator Rotation (16 Sanctuaries in SanctuaryForm)
+Kanha, Sundarbans, Tadoba, Manas, Pench, Dandeli, Satpura, Eravikulam, Corbett (Dhikala), Bandhavgarh, Panna, Hemis, Silent Valley, Similipal, Desert National Park, and Kuno.

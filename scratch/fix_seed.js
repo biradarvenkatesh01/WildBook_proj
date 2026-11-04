@@ -10,3 +10,4 @@ c = c.replace(
 
 fs.writeFileSync(file, c, 'utf8');
 console.log('✓ Fixed admin 3 in 05_seed.sql');
+

@@ -158,3 +158,4 @@ if (hasCRLF) {
 
 fs.writeFileSync(seedFile, content, 'utf8');
 console.log('✓ Successfully adapted 05_seed.sql cleanly for 9-table schema');
+

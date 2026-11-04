@@ -13,6 +13,18 @@ const DEMO_VISITORS = [
   { name: 'Vikramaditya Sen', emailPrefix: 'vikram.sen', phone: '9425123456' },
   { name: 'Maya Patel', emailPrefix: 'maya.patel', phone: '9825123456' },
   { name: 'Arjun Nair', emailPrefix: 'arjun.nair', phone: '9447123456' },
+  { name: 'Priya Deshmukh', emailPrefix: 'priya.deshmukh', phone: '9822012345' },
+  { name: 'Ananya Iyer', emailPrefix: 'ananya.iyer', phone: '9840156789' },
+  { name: 'Siddharth Malhotra', emailPrefix: 'siddharth.m', phone: '9810123456' },
+  { name: 'Tanvi Joshi', emailPrefix: 'tanvi.joshi', phone: '9422034567' },
+  { name: 'Kabir Mehta', emailPrefix: 'kabir.mehta', phone: '9820067890' },
+  { name: 'Devika Menon', emailPrefix: 'devika.menon', phone: '9446012345' },
+  { name: 'Rohit Bhattacharya', emailPrefix: 'rohit.bhatta', phone: '9830023456' },
+  { name: 'Ishaan Saxena', emailPrefix: 'ishaan.saxena', phone: '9415034567' },
+  { name: 'Nandini Reddy', emailPrefix: 'nandini.reddy', phone: '9848045678' },
+  { name: 'Varun Chadha', emailPrefix: 'varun.chadha', phone: '9811056789' },
+  { name: 'Meera Singhania', emailPrefix: 'meera.singh', phone: '9829067890' },
+  { name: 'Akash Deep', emailPrefix: 'akash.deep', phone: '9431078901' },
 ];
 
 export default function VisitorSignup() {

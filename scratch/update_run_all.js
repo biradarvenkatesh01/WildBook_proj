@@ -26,3 +26,4 @@ c = c.replace(
 
 fs.writeFileSync(filePath, c, 'utf8');
 console.log('✓ Successfully updated database/run_all.js');
+
